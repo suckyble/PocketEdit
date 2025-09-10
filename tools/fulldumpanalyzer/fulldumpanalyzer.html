@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Preset Name Extractor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        #debugOutput {
+            background-color: #1E293B;
+            color: #E2E8F0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
+        
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-900">Preset Name Extractor</h1>
+            <p class="text-gray-600 mt-2">Paste the full device dump below to decode preset names.</p>
+        </header>
+
+        <main>
+            <div class="mb-6">
+                <label for="dumpInput" class="block text-sm font-medium text-gray-700 mb-2">Device Dump Data:</label>
+                <textarea id="dumpInput" rows="10" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out" placeholder="Paste the 20 dump packs here..."></textarea>
+            </div>
+
+            <div class="flex justify-center items-center gap-4 mb-6">
+                <button id="translateBtn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50 transition-transform transform hover:scale-105">
+                    Translate
+                </button>
+                 <button id="debugBtn" class="hidden bg-gray-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-500 focus:ring-opacity-50 transition-transform transform hover:scale-105">
+                    Show Debug Info
+                </button>
+            </div>
+
+            <div id="results" class="space-y-6">
+                <!-- Results will be injected here -->
+            </div>
+            <div id="errorMessage" class="hidden mt-4 text-center text-red-600 font-medium p-3 bg-red-100 rounded-lg"></div>
+            
+            <div id="debugContainer" class="hidden mt-6">
+                <h3 class="text-lg font-bold text-center mb-2">Parser Debug Log</h3>
+                <pre id="debugOutput"></pre>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // --- 1. SETUP AND DATA ---
+        const CHARACTER_MAP = {
+            "0000": null, // Padding character
+            "0200": " ", "0201": "!", "0203": "#", "0205": "%", "0206": "&", "0207": "'", "0208": "(", "0209": ")", "020A": "*", "020B": "+", "020C": ",", "020D": "-", "020E": ".", "020F": "/",
+            "0300": "0", "0301": "1", "0302": "2", "0303": "3", "0304": "4", "0305": "5", "0306": "6", "0307": "7", "0308": "8", "0309": "9", "030A": ":", "030B": ";", "030C": "<", "030D": "=", "030E": ">",
+            "0400": "@", "0401": "A", "0402": "B", "0403": "C", "0404": "D", "0405": "E", "0406": "F", "0407": "G", "0408": "H", "0409": "I", "040A": "J", "040B": "K", "040C": "L", "040D": "M", "040E": "N", "040F": "O",
+            "0500": "P", "0501": "Q", "0502": "R", "0503": "S", "0504": "T", "0505": "U", "0506": "V", "0507": "W", "0508": "X", "0509": "Y", "050A": "Z", "050B": "[", "050C": "\\", "050D": "]", "050F": "_",
+            "0601": "a", "0602": "b", "0603": "c", "0604": "d", "0605": "e", "0606": "f", "0607": "g", "0608": "h", "0609": "i", "060A": "j", "060B": "k", "060C": "l", "060D": "m", "060E": "n", "060F": "o",
+            "0700": "p",
+            "0701": "q", "0702": "r", "0703": "s", "0704": "t", "0705": "u", "0706": "v", "0707": "w", "0708": "x", "0709": "y", "070A": "z", "070B": "{", "070D": "}", "070E": "~"
+        };
+
+        const translateBtn = document.getElementById('translateBtn');
+        const debugBtn = document.getElementById('debugBtn');
+        const dumpInput = document.getElementById('dumpInput');
+        const resultsContainer = document.getElementById('results');
+        const errorMessage = document.getElementById('errorMessage');
+        const debugContainer = document.getElementById('debugContainer');
+        const debugOutput = document.getElementById('debugOutput');
+
+        translateBtn.addEventListener('click', handleTranslation);
+        debugBtn.addEventListener('click', () => {
+             debugContainer.classList.toggle('hidden');
+             debugBtn.textContent = debugContainer.classList.contains('hidden') ? 'Show Debug Info' : 'Hide Debug Info';
+        });
+        
+        // --- 2. CORE LOGIC ---
+        function handleTranslation() {
+            const rawInput = dumpInput.value;
+            const debugLog = [];
+
+            // Reset UI
+            resultsContainer.innerHTML = '';
+            errorMessage.classList.add('hidden');
+            errorMessage.textContent = '';
+            debugContainer.classList.add('hidden');
+            debugOutput.textContent = '';
+            debugBtn.classList.add('hidden');
+
+            try {
+                const packets = cleanAndSplitInput(rawInput, debugLog);
+                if (packets.length < 20) {
+                     throw new Error(`Invalid dump format. Found only ${packets.length} packets, but expected 20. Please check the full dump data is pasted.`);
+                }
+                
+                let allNames = [];
+                packets.forEach((packet, index) => {
+                    debugLog.push(`\n--- PROCESSING PACKET ${index + 1} ---`);
+                    const namesInPacket = parsePacketForNames(packet, debugLog);
+                    if (namesInPacket.length < 5) {
+                        debugLog.push(`[!] WARNING: Found only ${namesInPacket.length}/5 names in this packet.`);
+                    } else {
+                        debugLog.push(`[✓] Found all 5 names in this packet.`);
+                    }
+                    allNames.push(...namesInPacket);
+                });
+
+                if(allNames.length < 100) {
+                    throw new Error(`Parsing failed. Found only ${allNames.length} names, but expected 100. Please check the debug log for warnings.`);
+                }
+                
+                renderResults(allNames);
+
+            } catch (error) {
+                errorMessage.textContent = error.message;
+                errorMessage.classList.remove('hidden');
+                console.error(error);
+            } finally {
+                // Always show the debug button and log after an attempt
+                debugOutput.textContent = debugLog.join('\n');
+                debugBtn.classList.remove('hidden');
+                debugBtn.textContent = 'Show Debug Info';
+            }
+        }
+        
+        function cleanAndSplitInput(rawText, debugLog) {
+            const packetRegex = /80\s*80\s*F0([\s\S]*?)F7/g;
+            const packets = [];
+            let match;
+            while ((match = packetRegex.exec(rawText)) !== null) {
+                const cleanedPacket = match[1].replace(/[^0-9A-F]/gi, '').toUpperCase();
+                if (cleanedPacket.length > 200) packets.push(cleanedPacket);
+            }
+            debugLog.push(`[INFO] Found ${packets.length} potential data packets.`);
+            return packets;
+        }
+
+        function parsePacketForNames(packetHex, debugLog) {
+            const foundNames = [];
+            const NAME_HEX_LENGTH = 40;
+            const BLOCK_HEX_STRIDE = 80; // Fixed distance between the start of each name block
+
+            let firstNameOffset = -1;
+
+            debugLog.push(`Searching for first name anchor in packet of length ${packetHex.length}...`);
+            for (let offset = 0; (offset + NAME_HEX_LENGTH) <= packetHex.length; offset += 2) {
+                const windowHex = packetHex.substring(offset, offset + NAME_HEX_LENGTH);
+                if (isValidNameBlock(windowHex)) {
+                    firstNameOffset = offset;
+                    debugLog.push(`  [✓] Found anchor at offset ${offset}.`);
+                    break;
+                }
+            }
+
+            if (firstNameOffset === -1) {
+                debugLog.push(`  [X] ERROR: No valid name anchor found in this packet.`);
+                return [];
+            }
+
+            for (let i = 0; i < 5; i++) {
+                const currentOffset = firstNameOffset + (i * BLOCK_HEX_STRIDE);
+                debugLog.push(`  Attempting read #${i+1} at offset ${currentOffset}...`);
+                if ((currentOffset + NAME_HEX_LENGTH) <= packetHex.length) {
+                    const windowHex = packetHex.substring(currentOffset, currentOffset + NAME_HEX_LENGTH);
+                    if (isValidNameBlock(windowHex)) {
+                        const decodedName = decodeName(windowHex);
+                        foundNames.push(decodedName);
+                        debugLog.push(`    -> SUCCESS: Decoded as "${decodedName}" from hex: ${windowHex}`);
+                    } else {
+                        debugLog.push(`    -> FAILED: Data at this offset is not a valid name block. Hex: ${windowHex}`);
+                    }
+                } else {
+                    debugLog.push(`    -> FAILED: Offset is out of bounds.`);
+                }
+            }
+            return foundNames;
+        }
+        
+        function isValidNameBlock(hexString) {
+            if (hexString.length !== 40) return false;
+            let hasFoundPadding = false, hasFoundValidChar = false;
+            for (let i = 0; i < 10; i++) {
+                const chunk = hexString.substring(i * 4, (i * 4) + 4);
+                if (hasFoundPadding) {
+                    if (chunk !== '0000') return false; 
+                } else {
+                    if (CHARACTER_MAP[chunk] === undefined) return false;
+                    if (CHARACTER_MAP[chunk] === null) hasFoundPadding = true;
+                    else hasFoundValidChar = true;
+                }
+            }
+            return hasFoundValidChar;
+        }
+
+        function decodeName(hexString) {
+            let name = '';
+            for (let i = 0; i < 10; i++) {
+                const chunk = hexString.substring(i * 4, (i * 4) + 4);
+                const char = CHARACTER_MAP[chunk];
+                if (char === null) break;
+                name += char;
+            }
+            return name;
+        }
+
+        // --- 3. RENDERING ---
+        function renderResults(names) {
+            const userPresets = names.slice(0, 50);
+            const factoryPresets = names.slice(50, 100);
+            const userTable = createPresetTable("User Presets (P01 - P50)", userPresets, "P");
+            const factoryTable = createPresetTable("Factory Presets (F01 - F50)", factoryPresets, "F");
+            resultsContainer.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-6">${userTable}${factoryTable}</div>`;
+        }
+
+        function createPresetTable(title, presets, prefix) {
+            let rows = presets.map((name, index) => {
+                const number = (index + 1).toString().padStart(2, '0');
+                const isEven = index % 2 === 0;
+                return `<tr class="${isEven ? 'bg-gray-50' : 'bg-white'}"><td class="px-4 py-2 font-mono text-sm text-gray-500">${prefix}${number}</td><td class="px-4 py-2 font-semibold">${name || '&nbsp;'}</td></tr>`;
+            }).join('');
+            return `<div class="bg-white rounded-lg border border-gray-200"><h2 class="text-xl font-bold text-gray-800 p-4 border-b">${title}</h2><div class="table-container"><table class="w-full"><thead class="bg-gray-100 sticky top-0"><tr><th class="text-left px-4 py-2 w-1/4">Preset</th><th class="text-left px-4 py-2">Decoded Name</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+        }
+    </script>
+</body>
+</html>
+
