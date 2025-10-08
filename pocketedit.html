@@ -731,6 +731,149 @@
             padding: 4px 6px; 
         }
 
+      /* Main container for the entire tap tempo section */
+        .tap-tempo-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #555;
+        }
+        
+        /* Grid layout for the main components */
+        .tap-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        /* Styling for the BPM and Delay Time display boxes */
+        .tap-display {
+            background-color: #222;
+            border-radius: 6px;
+            padding: 10px;
+            border: 1px solid #444;
+        }
+        
+        /* BPM and Delay Time text input styling */
+        .bpm-input {
+            width: 100%;
+            background-color: transparent;
+            border: none;
+            /* Color updated to match the slider's active color */
+            color: #ff6b35;
+            font-size: 1.5em;
+            font-weight: 700;
+            font-family: "Courier New", Courier, monospace;
+            text-align: center;
+            padding: 0;
+        }
+        
+        /* Removes the number input arrows in Chrome/Safari */
+        .bpm-input::-webkit-outer-spin-button,
+        .bpm-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        /* Removes the number input arrows in Firefox */
+        .bpm-input[type=number] {
+            -moz-appearance: textfield;
+        }
+        
+        /* Subtle background highlight when the BPM input is focused */
+        .bpm-input:focus {
+            outline: none;
+            background-color: rgba(247, 147, 30, 0.1);
+        }
+        
+        /* "BPM" and "Delay Time" labels under the displays */
+        .display-label {
+            font-size: 0.7em;
+            color: #999;
+            text-transform: uppercase;
+            display: block;
+            margin-top: 2px;
+        }
+        
+        /* Main "TAP" button styling */
+        .tap-button {
+            grid-column: 1 / -1;
+            padding: 1rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            /* Updated background to a neutral gray */
+            background-color: #555;
+            border: 1px solid #777;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.1s ease-out, box-shadow 0.1s ease-out, color 0.1s ease-out;
+        }
+        
+        /* "TAP" button active (pressed) state */
+        .tap-button:active {
+            /* Updated to the primary slider color */
+            background-color: #ff6b35;
+            transform: scale(0.98);
+        }
+        
+        /* Visual indicator for the BPM beat */
+       .tap-button.beat-flash {
+            /* The text will flash to the active orange color */
+            color: #ff6b35;
+        }
+        
+        /* Container for the note division buttons (1/4, 1/8, etc.) */
+        .note-divisions {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        
+        /* Individual note division button styling */
+        .note-btn {
+            flex-grow: 1;
+            padding: 0.6rem 0;
+            font-size: 0.9rem;
+            color: #ccc;
+            background-color: #4f4f4f;
+            border: 1px solid #555;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        /* Active note division button styling */
+        .note-btn.active {
+            /* Updated to the primary slider color */
+            background-color: #ff6b35;
+            color: #fff;
+            /* A slightly brighter orange for the border */
+            border-color: #ff6b35;
+            font-weight: bold;
+        }
+
+        .bpm-input.out-of-range {
+            /* This animation will run when the class is active */
+            animation: flash-red 0.8s infinite;
+        }
+        
+        /* This defines the flashing animation itself */
+        @keyframes flash-red {
+            0% { background-color: transparent; }
+            50% { background-color: #9d2c2c; } /* A dark red flash */
+            100% { background-color: transparent; }
+        }
+        
+        #delay-time-ms-7 {
+            font-size: 1.2em;
+            color: #ccc;
+            transition: color 0.2s ease; /* Optional: adds a smooth fade to red */
+        }
+
+
+
     </style>
 </head>
 <body>
@@ -1133,12 +1276,12 @@
             <button class="btn" id="clearLogBtn" style="padding: 4px 8px; font-size: 10px; width: auto;">Clear</button>
         </div>
         <div class="debug-buttons-panel">
-        	<button id="syncPresetNamesBtn" class="btn" disabled>Sync Preset Names</button>
-        	<button id="syncModulesBtn" class="btn" disabled>Sync Modules</button>
-        	<button id="syncUserIRsBtn" class="btn" disabled>Sync User IRs</button>
-        	<button id="syncCloneAmpsBtn" class="btn" disabled>Sync Clone Amps</button>
-        	<button id="syncGlobalsBtn" class="btn" disabled>Sync Global Settings</button>
-    	</div>
+            <button id="syncPresetNamesBtn" class="btn" disabled>Sync Preset Names</button>
+            <button id="syncModulesBtn" class="btn" disabled>Sync Modules</button>
+            <button id="syncUserIRsBtn" class="btn" disabled>Sync User IRs</button>
+            <button id="syncCloneAmpsBtn" class="btn" disabled>Sync Clone Amps</button>
+            <button id="syncGlobalsBtn" class="btn" disabled>Sync Global Settings</button>
+        </div>
         <div class="manual-command-panel">
             <input type="text" id="manualCommandInput" placeholder="Enter hex command...">
             <button id="sendManualCommandBtn" class="btn">Send</button>
@@ -1172,8 +1315,8 @@
     <script>
 
 
-    	const MODULE_LIBRARY_DATA = {
-    		  "effectLibrary": {
+        const MODULE_LIBRARY_DATA = {
+              "effectLibrary": {
     "1": {
       "name": "Gate",
       "descriptionEn": "Based on famous ISP®Decimator™* noise gate pedal.\n\nTHRE: Controls the gate trigger level",
@@ -9532,6 +9675,9 @@
 </svg>
 `;
                 
+                this.ampModeFxId3 = undefined; // Stores the last selected FX ID when in Factory Mode
+                this.ampModeFxId9 = undefined; // Stores the last selected FX ID when in Clone Mode
+
                 this.definitions = null; 
                 this.commands = null;
                 this.activePatchTab = 'user';
@@ -9601,104 +9747,104 @@
                 '000008000B0F': -1, 
                 '000000000000': 0, 
                 '0C0C0C0C030D': 0.1,
-  				'0C0C040C030E': 0.2,
-  				'09090909030E': 0.3,
-  				'0C0C0C0C030E': 0.4,
-  				'00000000030F': 0.5,
-  				'09090109030F': 0.6,
-  				'03030303030F': 0.7,
-  				'0C0C040C030F': 0.8,
-  				'06060606030F': 0.9,
-  				'00000800030F': 1,
-  				'0C0C080C030F': 1.1,
-  				'09090909030F': 1.2,
-  				'06060A06030F': 1.3,
-  				'03030B03030F': 1.4,
-  				'00000C00030F': 1.5,
-  				'0C0C0C0C030F': 1.6,
-  				'09090D09030F': 1.7,
-  				'06060E06030F': 1.8,
-  				'03030F03030F': 1.9,
-  				'000000000400': 2,
-  				'060600060400': 2.1,
-  				'0C0C000C0400': 2.2,
-  				'030301030400': 2.3,
-  				'090901090400': 2.4,
-  				'000002000400': 2.5,
-  				'060602060400': 2.6,
-  				'0C0C020C0400': 2.7,
-  				'030303030400': 2.8,
-  				'090903090400': 2.9,
-  				'000004000400': 3,
-  				'060604060400': 3.1,
-  				'0C0C040C0400': 3.2,
-  				'030305030400': 3.3,
-  				'090905090400': 3.4,
-  				'000006000400': 3.5,
-  				'060606060400': 3.6,
-  				'0C0C060C0400': 3.7,
-  				'030307030400': 3.8,
-  				'090907090400': 3.9,
-  				'000008000400': 4,
-  				'030308030400': 4.1,
-  				'060608060400': 4.2,
-  				'090908090400': 4.3,
-  				'0C0C080C0400': 4.4,
-  				'000009000400': 4.5,
-  				'030309030400': 4.6,
-  				'060609060400': 4.7,
-  				'090909090400': 4.8,
-  				'0C0C090C0400': 4.9,
-  				'00000A000400': 5,
-  				'03030A030400': 5.1,
-  				'06060A060400': 5.2,
-  				'09090A090400': 5.3,
-  				'0C0C0A0C0400': 5.4,
-  				'00000B000400': 5.5,
-  				'03030B030400': 5.6,
-  				'06060B060400': 5.7,
-  				'09090B090400': 5.8,
-  				'0C0C0B0C0400': 5.9,
-  				'00000C000400': 6,
-  				'03030C030400': 6.1,
-  				'06060C060400': 6.2,
-  				'09090C090400': 6.3,
-  				'0C0C0C0C0400': 6.4,
-  				'00000D000400': 6.5,
-  				'03030D030400': 6.6,
-  				'06060D060400': 6.7,
-  				'09090D090400': 6.8,
-  				'0C0C0D0C0400': 6.9,
-  				'00000E000400': 7,
-  				'03030E030400': 7.1,
-  				'06060E060400': 7.2,
-  				'09090E090400': 7.3,
-  				'0C0C0E0C0400': 7.4,
-  				'00000F000400': 7.5,
-  				'03030F030400': 7.6,
-  				'06060F060400': 7.7,
-  				'09090F090400': 7.8,
-  				'0C0C0F0C0400': 7.9,
-  				'000000000401': 8,
-  				'090900010401': 8.1,
-  				'030300030401': 8.2,
-  				'0C0C00040401': 8.3,
-  				'060600060401': 8.4,
-  				'000000080401': 8.5,
-  				'090900090401': 8.6,
-  				'0303000B0401': 8.7,
-  				'0C0C000C0401': 8.8,
-  				'0606000E0401': 8.9,
-  				'000001000401': 9,
-  				'090901010401': 9.1,
-  				'030301030401': 9.2,
-  				'0C0C01040401': 9.3,
-  				'060601060401': 9.4,
-  				'000001080401': 9.5,
-  				'090901090401': 9.6,
-  				'0303010B0401': 9.7,
-  				'0C0C010C0401': 9.8,
-  				'0606010E0401': 9.9, 
+                '0C0C040C030E': 0.2,
+                '09090909030E': 0.3,
+                '0C0C0C0C030E': 0.4,
+                '00000000030F': 0.5,
+                '09090109030F': 0.6,
+                '03030303030F': 0.7,
+                '0C0C040C030F': 0.8,
+                '06060606030F': 0.9,
+                '00000800030F': 1,
+                '0C0C080C030F': 1.1,
+                '09090909030F': 1.2,
+                '06060A06030F': 1.3,
+                '03030B03030F': 1.4,
+                '00000C00030F': 1.5,
+                '0C0C0C0C030F': 1.6,
+                '09090D09030F': 1.7,
+                '06060E06030F': 1.8,
+                '03030F03030F': 1.9,
+                '000000000400': 2,
+                '060600060400': 2.1,
+                '0C0C000C0400': 2.2,
+                '030301030400': 2.3,
+                '090901090400': 2.4,
+                '000002000400': 2.5,
+                '060602060400': 2.6,
+                '0C0C020C0400': 2.7,
+                '030303030400': 2.8,
+                '090903090400': 2.9,
+                '000004000400': 3,
+                '060604060400': 3.1,
+                '0C0C040C0400': 3.2,
+                '030305030400': 3.3,
+                '090905090400': 3.4,
+                '000006000400': 3.5,
+                '060606060400': 3.6,
+                '0C0C060C0400': 3.7,
+                '030307030400': 3.8,
+                '090907090400': 3.9,
+                '000008000400': 4,
+                '030308030400': 4.1,
+                '060608060400': 4.2,
+                '090908090400': 4.3,
+                '0C0C080C0400': 4.4,
+                '000009000400': 4.5,
+                '030309030400': 4.6,
+                '060609060400': 4.7,
+                '090909090400': 4.8,
+                '0C0C090C0400': 4.9,
+                '00000A000400': 5,
+                '03030A030400': 5.1,
+                '06060A060400': 5.2,
+                '09090A090400': 5.3,
+                '0C0C0A0C0400': 5.4,
+                '00000B000400': 5.5,
+                '03030B030400': 5.6,
+                '06060B060400': 5.7,
+                '09090B090400': 5.8,
+                '0C0C0B0C0400': 5.9,
+                '00000C000400': 6,
+                '03030C030400': 6.1,
+                '06060C060400': 6.2,
+                '09090C090400': 6.3,
+                '0C0C0C0C0400': 6.4,
+                '00000D000400': 6.5,
+                '03030D030400': 6.6,
+                '06060D060400': 6.7,
+                '09090D090400': 6.8,
+                '0C0C0D0C0400': 6.9,
+                '00000E000400': 7,
+                '03030E030400': 7.1,
+                '06060E060400': 7.2,
+                '09090E090400': 7.3,
+                '0C0C0E0C0400': 7.4,
+                '00000F000400': 7.5,
+                '03030F030400': 7.6,
+                '06060F060400': 7.7,
+                '09090F090400': 7.8,
+                '0C0C0F0C0400': 7.9,
+                '000000000401': 8,
+                '090900010401': 8.1,
+                '030300030401': 8.2,
+                '0C0C00040401': 8.3,
+                '060600060401': 8.4,
+                '000000080401': 8.5,
+                '090900090401': 8.6,
+                '0303000B0401': 8.7,
+                '0C0C000C0401': 8.8,
+                '0606000E0401': 8.9,
+                '000001000401': 9,
+                '090901010401': 9.1,
+                '030301030401': 9.2,
+                '0C0C01040401': 9.3,
+                '060601060401': 9.4,
+                '000001080401': 9.5,
+                '090901090401': 9.6,
+                '0303010B0401': 9.7,
+                '0C0C010C0401': 9.8,
+                '0606010E0401': 9.9, 
                 '000002000401': 10, 
                 '000003000401': 11, 
                 '000004000401': 12, 
@@ -10821,41 +10967,41 @@
             }
 
             startEditor() {
-        	    this.log('Loading hardcoded libraries...', 'info');
-	        	    this.definitions = MODULE_LIBRARY_DATA;
-	        	    this.commands = COMMAND_LIBRARY_DATA;
-	
-	        	    if (!this.definitions || !this.commands) {
-	        	        this.log('❌ Error: Hardcoded library data is missing.', 'error');
-	        	        alert('Error: Library data is missing. Check the script tag.');
-	        	        return;
-	        	    }
-	
-	        	    this.log('✅ Libraries loaded successfully.', 'info');
-	
-	        	    this.buildFxIdMaps();
-	        	    this.populatePatchLists();
-	        	    this.populateUIFromDefinitions();
-	        	    this.setupControlListeners();
-	        	    this.setupAmpCloneMode();
-	        	    this.setupDragAndDrop();
-	
-	        	    document.getElementById('editor-container').style.display = 'flex';
-	
-        	    const firstUserPatch = document.querySelector('#patchListContainer .patch-item');
-        	    if (firstUserPatch) {
-        	        const baseName = firstUserPatch.dataset.baseName;
-        	        const displayText = firstUserPatch.textContent;
-        	        const displayName = displayText.includes(': ') ? displayText.split(': ')[1] : 'Preset';
-        	        document.getElementById('patchNumber').textContent = baseName;
-        	        document.getElementById('patchName').textContent = displayName;
-        	        firstUserPatch.classList.add('selected');
-        	    }
-        	    this.selectModule(0); 
-        	    document.querySelectorAll('.slider').forEach(slider => {
-        	        this.updateSliderProgress(slider);
-        	    });
-        	}
+                this.log('Loading hardcoded libraries...', 'info');
+                    this.definitions = MODULE_LIBRARY_DATA;
+                    this.commands = COMMAND_LIBRARY_DATA;
+    
+                    if (!this.definitions || !this.commands) {
+                        this.log('❌ Error: Hardcoded library data is missing.', 'error');
+                        alert('Error: Library data is missing. Check the script tag.');
+                        return;
+                    }
+    
+                    this.log('✅ Libraries loaded successfully.', 'info');
+    
+                    this.buildFxIdMaps();
+                    this.populatePatchLists();
+                    this.populateUIFromDefinitions();
+                    this.setupControlListeners();
+                    this.setupAmpCloneMode();
+                    this.setupDragAndDrop();
+    
+                    document.getElementById('editor-container').style.display = 'flex';
+    
+                const firstUserPatch = document.querySelector('#patchListContainer .patch-item');
+                if (firstUserPatch) {
+                    const baseName = firstUserPatch.dataset.baseName;
+                    const displayText = firstUserPatch.textContent;
+                    const displayName = displayText.includes(': ') ? displayText.split(': ')[1] : 'Preset';
+                    document.getElementById('patchNumber').textContent = baseName;
+                    document.getElementById('patchName').textContent = displayName;
+                    firstUserPatch.classList.add('selected');
+                }
+                this.selectModule(0); 
+                document.querySelectorAll('.slider').forEach(slider => {
+                    this.updateSliderProgress(slider);
+                });
+            }
 
             async loadFiles() {
                     this.log('Attempting to load library files...', 'info');
@@ -11064,7 +11210,7 @@
             }
 
 
-			async updatePatchInfo(element, sendCommand = false) {
+            async updatePatchInfo(element, sendCommand = false) {
                 if (!element) return;
 
                 // If the user is clicking a new preset, first check the status of the CURRENT one.
@@ -11084,7 +11230,7 @@
                     await new Promise(resolve => setTimeout(resolve, 200)); // Wait 200ms for notification
 
                     // Only show the warning if a preset is modified AND an initial sync is NOT in progress.
-				if (this.isPresetModified && !this.isInitialSyncing) {
+                if (this.isPresetModified && !this.isInitialSyncing) {
                         if (!confirm("Current preset has been modified and not saved, do you still want to continue?")) {
                             return; // Stop if user clicks "Cancel"
                         }
@@ -11164,14 +11310,21 @@
                 const cloneModeToggle = document.getElementById('amp-clone-mode');
                 const ampTypeSelect = document.getElementById('module-type-3');
                 const irModuleElement = document.querySelector('[data-module-id="4"]');
-
+            
                 if (!cloneModeToggle || !ampTypeSelect || !this.definitions) return;
-
-                const populate = (moduleId) => {
+            
+                // --- 1. Initialize Storage Properties (Add these to your constructor if not present) ---
+                if (this.ampModeFxId3 === undefined) this.ampModeFxId3 = parseInt(ampTypeSelect.value, 10);
+                if (this.ampModeFxId9 === undefined) this.ampModeFxId9 = this.definitions.modules.find(m => m.moduleId === 9).effects[0];
+            
+            
+                const populate = (moduleId, lastSelectedFxId) => {
                     const moduleDef = this.definitions.modules.find(m => m.moduleId === moduleId);
                     if (!moduleDef) return;
-
+            
                     ampTypeSelect.innerHTML = '';
+                    let initialFxId = moduleDef.effects[0]; // Default to first effect in the list
+            
                     moduleDef.effects.forEach(fxId => {
                         const effect = this.definitions.effectLibrary[fxId];
                         if (effect) {
@@ -11179,29 +11332,78 @@
                             option.value = fxId;
                             option.textContent = effect.name;
                             ampTypeSelect.appendChild(option);
+            
+                            // If this is the last selected ID, set it as the initial selection
+                            if (fxId === lastSelectedFxId) {
+                                initialFxId = fxId;
+                            }
                         }
                     });
-                    ampTypeSelect.dispatchEvent(new Event('change'));
+            
+                    // Set the dropdown's value to the stored or default FX ID
+                    ampTypeSelect.value = initialFxId;
+                    return initialFxId;
                 };
-                
-                populate(3);
-
+            
+                // Helper function to force control update using the current mode's ID.
+                const forceControlUpdate = (currentModuleId, selectedFxId) => {
+                    // This targets the controls for the Amp module's UI slot (ID 3) 
+                    // but passes the correct logical module ID (3 or 9) to rebuild the parameters.
+                    this.createParameterControls(3, selectedFxId); 
+                };
+            
+                // 2. Initial Setup (Load Factory Amp state)
+                const initialFxId = populate(3, this.ampModeFxId3);
+                forceControlUpdate(3, initialFxId); 
+            
                 cloneModeToggle.addEventListener('click', () => {
                     const isTurningOnCloneMode = !cloneModeToggle.classList.contains('on');
                     this.updateIRModuleForCloneMode(isTurningOnCloneMode);
                     
+                    // --- STEP A: SAVE CURRENT STATE ---
+                    const lastModuleId = isTurningOnCloneMode ? 3 : 9;
+                    const currentFxId = parseInt(ampTypeSelect.value, 10);
+            
+                    if (lastModuleId === 3) {
+                        this.ampModeFxId3 = currentFxId;
+                    } else {
+                        this.ampModeFxId9 = currentFxId;
+                    }
+            
+                    // --- STEP B: SWITCH MODE & LOAD PREVIOUS STATE ---
+                    const targetModuleId = isTurningOnCloneMode ? 9 : 3;
+                    const lastSelectedId = isTurningOnCloneMode ? this.ampModeFxId9 : this.ampModeFxId3;
+            
                     if (isTurningOnCloneMode) {
                         cloneModeToggle.classList.add('on');
-                        populate(9);
+                        
+                        // Fix 1: Load Amp Types (Module 9) using the stored FX ID
+                        const newFxId = populate(targetModuleId, lastSelectedId); 
+                        
                         this.writeCommand(this.commands.ampModes.clone);
                         if (irModuleElement) irModuleElement.classList.remove('disabled');
                         this.log('AMP panel switched to CLONE mode.', 'info');
                     } else {
                         cloneModeToggle.classList.remove('on');
-                        populate(3);
+                        
+                        // Fix 2: Load Amp Types (Module 3) using the stored FX ID
+                        const newFxId = populate(targetModuleId, lastSelectedId);
+                        
                         this.writeCommand(this.commands.ampModes.factory);
                         if (irModuleElement) irModuleElement.classList.remove('disabled');
                         this.log('AMP panel switched to FACTORY mode.', 'info');
+                    }
+                    
+                    // --- STEP C: FORCE UI REBUILD AND SEND PARAMETER COMMANDS ---
+                    
+                    // 1. Force the correct controls for the newly active FX type to display
+                    const finalFxId = parseInt(ampTypeSelect.value, 10);
+                    forceControlUpdate(targetModuleId, finalFxId); 
+                    
+                    // 2. Write the command for the final FX type to update the device state immediately
+                    const typeCommand = this.commands.effectTypes?.[targetModuleId]?.[finalFxId];
+                    if (typeCommand) {
+                         this.writeCommand(typeCommand);
                     }
                 });
             }
@@ -11367,50 +11569,74 @@
                 });
                 document.body.addEventListener('change', event => {
                     const target = event.target;
+                    
+                    // Check for Module Type dropdown changes (like Amp Model/Clone Model selection)
                     if (target.classList.contains('dropdown-select') && target.id.startsWith('module-type-')) {
                         const moduleId = parseInt(target.id.split('-')[2], 10);
                         const fxId = parseInt(target.value, 10);
+                        
+                        let lookupModuleId = moduleId; // Default is the physical ID (3)
+                
+                        // --- FIX: REROUTING LOGIC FOR FX TYPE COMMAND LOOKUP ---
+                        // If the dropdown is the Amp slot (ID 3) AND Clone Mode is active/commands exist under ID 9,
+                        // use ID 9 for finding the EFFECT TYPE COMMAND.
+                        if (moduleId === 3 && window.bleEditor.commands.effectTypes?.[9]?.[fxId] !== undefined) {
+                             lookupModuleId = 9;
+                        }
+                        // --------------------------------------------------------
+                        
+                        // 1. Rebuild UI controls using the physical ID. (This correctly triggers parameter rebuild)
                         this.createParameterControls(moduleId, fxId);
-                        this.onParameterChange(target);
+                        
+                        // 2. Send command using the correct LOOKUP ID.
+                        const command = this.commands.effectTypes?.[lookupModuleId]?.[fxId]; // Use the derived lookup ID
+                        
+                        if (command) {
+                            this.log(`UI Change: Module ${lookupModuleId} type set to Effect ${fxId}`, 'info');
+                            this.writeCommand(command);
+                        } else {
+                             this.log('No command found for effect type change.', 'error');
+                        }
                     }
                     else if (target.classList.contains('dropdown-select') && target.dataset.algId !== undefined) {
-                            this.onParameterChange(target);
-                        }
+                        // Handles internal parameter dropdowns (Sliders/Toggles/etc.)
+                        // This is correctly handled by onParameterChange using the element's existing data-module-id.
+                        this.onParameterChange(target);
+                    }
                 });
             }
 
             createParameterControls(moduleId, fxId) {
                 const paramsSection = document.getElementById(`module-params-${moduleId}`);
                 if (!paramsSection) return;
-                
+            
                 const effectDef = this.definitions.effectLibrary[fxId];
                 if (!effectDef) {
                     paramsSection.innerHTML = '';
                     return;
                 }
-                
+            
                 const isCloneEffect = effectDef.name.startsWith('User Profile');
                 const logicalModuleId = isCloneEffect ? 9 : moduleId;
-
-
+            
                 const moduleTypeElement = document.querySelector(`.chain-module[data-module-id="${moduleId}"] .module-type`);
                 if (moduleTypeElement) {
                     moduleTypeElement.textContent = effectDef.name;
                 }
-
+            
                 let content = `<h4 style="color: #ccc;">${effectDef.name}</h4>`;
                 if (effectDef.descriptionEn) {
-                   content += `<p class="effect-description">${effectDef.descriptionEn.replace(/\n/g, '<br>')}</p>`;
+                    content += `<p class="effect-description">${effectDef.descriptionEn.replace(/\n/g, '<br>')}</p>`;
                 }
-
+            
                 effectDef.alg.forEach(param => {
                     const label = `<div class="control-label">${param.name}</div>`;
                     let controlHtml = '';
                     const dataAttributes = `data-module-id="${logicalModuleId}" data-fx-id="${fxId}" data-alg-id="${param.algId}"`;
-
+            
                     switch (param.widgetType) {
-                        case 0: 
-                        case 3: 
+                        case 0:
+                        case 3:
                             controlHtml = `
                                 ${label}
                                 <div class="slider-container">
@@ -11418,13 +11644,13 @@
                                     <span class="slider-value">${param.defaultValue}</span>
                                 </div>`;
                             break;
-                        case 1: 
+                        case 1:
                             controlHtml = `
                                 ${label}
                                 <div class="toggle-switch ${param.defaultValue ? 'on' : ''}" ${dataAttributes}></div>`;
                             break;
-                        case 2: 
-                            const options = param.options.map((opt, index) => 
+                        case 2:
+                            const options = param.options.map((opt, index) =>
                                 `<option value="${index}" ${param.defaultValue == index ? 'selected' : ''}>${opt}</option>`
                             ).join('');
                             controlHtml = `
@@ -11434,12 +11660,143 @@
                     }
                     content += `<div class="control-row">${controlHtml}</div>`;
                 });
+            
+                // ✨ CHANGE 1: If it's the DELAY module, append the tap tempo HTML to the 'content' string.
+                if (moduleId == '7') {
+                    const tapTempoHTML = `
+                        <div class="tap-tempo-section">
+                            <div class="tap-grid">
+                                <div class="tap-display">
+                                    <input type="number" id="tap-bpm-input-7" class="bpm-input" value="120.0" min="20" max="300" step="0.1">
+                                    <span class="display-label">BPM</span>
+                                </div>
+                                <div class="tap-display">
+                                    <span id="delay-time-ms-7" class="bpm-input">500ms</span>
+                                    <span class="display-label">Calculated delay time</span>
+                                </div>
+                                <button id="tap-button-7" class="tap-button">TAP TEMPO</button>
+                                <div id="note-divisions-7" class="note-divisions">
+                                    <button class="note-btn" data-multiplier="0.5">1/8</button>
+                                    <button class="note-btn" data-multiplier="0.75">1/8 dotted</button>
+                                    <button class="note-btn active" data-multiplier="1">1/4</button>
+                                    <button class="note-btn" data-multiplier="2">1/2</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    content += tapTempoHTML;
+                }
+            
                 paramsSection.innerHTML = content;
+                
+                // ✨ CHANGE 2: After rendering, if it was the DELAY module, call the setup logic.
+                if (moduleId == '7') {
+                    this.setupTapTempo();
+                }
+            
                 // After creating the controls, initialize the progress style for the new sliders.
                 paramsSection.querySelectorAll('.slider').forEach(slider => {
                     this.updateSliderProgress(slider);
                 });
             }
+
+            setupTapTempo() {
+                const tapButton = document.getElementById('tap-button-7');
+                const bpmInput = document.getElementById('tap-bpm-input-7');
+                const divisionButtonsContainer = document.getElementById('note-divisions-7');
+            
+                if (!tapButton || !bpmInput || !divisionButtonsContainer) {
+                    return;
+                }
+            
+                const divisionButtons = divisionButtonsContainer.querySelectorAll('.note-btn');
+                let tapTimestamps = [], currentBpm = 120.0;
+                let timeoutId = null, beatIntervalId = null;
+            
+                const updateDelayFromBpm = () => {
+                    const delayTimeSlider = document.querySelector('#module-params-7 .slider[data-alg-id="1"]');
+                    const delayTimeDisplay = document.getElementById('delay-time-ms-7');
+                    if (!delayTimeSlider || !delayTimeDisplay) return;
+            
+                    const activeMultiplierBtn = divisionButtonsContainer.querySelector('.note-btn.active');
+                    const noteMultiplier = activeMultiplierBtn ? parseFloat(activeMultiplierBtn.dataset.multiplier) : 1.0;
+            
+                    currentBpm = Math.max(20, Math.min(currentBpm, 300));
+                    currentBpm = Math.round(currentBpm * 2) / 2;
+            
+                    const finalDelayTimeMs = ((60 * 1000) / currentBpm) * noteMultiplier;
+                    
+                    const minTime = parseFloat(delayTimeSlider.min);
+                    const maxTime = parseFloat(delayTimeSlider.max);
+                    
+                    delayTimeDisplay.textContent = `${Math.round(finalDelayTimeMs)}ms`;
+            
+                    if (finalDelayTimeMs > maxTime) {
+                        delayTimeDisplay.classList.add('out-of-range');
+                    } else {
+                        delayTimeDisplay.classList.remove('out-of-range');
+                    }
+            
+                    const sliderValue = Math.max(minTime, Math.min(Math.round(finalDelayTimeMs), maxTime));
+                    
+                    delayTimeSlider.value = sliderValue;
+                    delayTimeSlider.dispatchEvent(new Event('input', { bubbles: true }));
+                    bpmInput.value = currentBpm.toFixed(1);
+                    startBeatIndicator();
+                };
+            
+                const calculateBpmFromTaps = () => {
+                    if (tapTimestamps.length < 2) return;
+                    const intervals = tapTimestamps.slice(1).map((t, i) => t - tapTimestamps[i]);
+                    const avg = intervals.reduce((s, v) => s + v, 0) / intervals.length;
+                    if (avg > 0 && avg < 3000) {
+                        currentBpm = (60 * 1000) / avg;
+                        updateDelayFromBpm();
+                    }
+                };
+            
+                const startBeatIndicator = () => {
+                    clearInterval(beatIntervalId);
+                    if(currentBpm <= 0) return;
+                    const intervalMs = (60 * 1000) / currentBpm;
+                    beatIntervalId = setInterval(() => {
+                        tapButton.classList.add('beat-flash');
+                        setTimeout(() => tapButton.classList.remove('beat-flash'), 100);
+                    }, intervalMs);
+                };
+            
+                tapButton.addEventListener('click', () => {
+                    clearTimeout(timeoutId);
+                    tapTimestamps.push(Date.now());
+                    if (tapTimestamps.length > 4) tapTimestamps.shift();
+                    calculateBpmFromTaps();
+                    timeoutId = setTimeout(() => tapTimestamps = [], 2000);
+                });
+            
+                bpmInput.addEventListener('change', () => {
+                    const val = parseFloat(bpmInput.value);
+                    if (!isNaN(val)) {
+                        currentBpm = val;
+                        updateDelayFromBpm();
+                    }
+                });
+            
+                bpmInput.addEventListener('dblclick', () => {
+                    bpmInput.select();
+                });
+            
+                divisionButtons.forEach(button => {
+                    button.addEventListener('click', e => {
+                        divisionButtons.forEach(btn => btn.classList.remove('active'));
+                        e.currentTarget.classList.add('active');
+                        updateDelayFromBpm();
+                    });
+                });
+                
+                currentBpm = parseFloat(bpmInput.value);
+                startBeatIndicator();
+            }
+
 
             selectModule(moduleId) {
                 if (this.activeModuleId === moduleId) return;
@@ -11476,35 +11833,72 @@
             }
             
             onParameterChange(element) {
+                // This generic logic correctly updates the text right next to ANY slider.
+                if (element.classList.contains('slider')) {
+                    const valueSpan = element.nextElementSibling;
+                    if (valueSpan && valueSpan.classList.contains('slider-value')) {
+                        valueSpan.textContent = element.value;
+                    }
+                }
+            
                 let command;
                 let moduleId, fxId, algId, value;
-
+                let lookupModuleId; // Variable for determining the correct command key
+            
                 if (element.id && element.id.startsWith('module-type-')) {
                     moduleId = parseInt(element.id.split('-')[2], 10);
                     fxId = parseInt(element.value, 10);
-                    command = this.commands.effectTypes?.[moduleId]?.[fxId];
-                    this.log(`UI Change: Module ${moduleId} type set to Effect ${fxId}`, 'info');
-
+                    
+                    // --- CORRECTED LOGIC FOR EFFECT TYPES ---
+                    // If the ID is 3 (physical Amp slot) and Clone Mode is visually active/enabled,
+                    // we assume the effect type being chosen is a Clone Amp effect (ID 9) 
+                    // that's being visually represented in the ID 3 slot. We use ID 3 only if Clone Mode is OFF.
+                    lookupModuleId = (moduleId === 3 && document.getElementById('amp-clone-mode').classList.contains('on')) 
+                                     ? 9 : moduleId;
+                    // ----------------------------------------
+                    
+                    command = this.commands.effectTypes?.[lookupModuleId]?.[fxId];
+                    this.log(`UI Change: Module ${moduleId} type set to Effect ${fxId} (Lookup ID: ${lookupModuleId})`, 'info');
+            
                 } else if (element.dataset.algId !== undefined) {
-                    moduleId = parseInt(element.dataset.moduleId, 10);
+                    // This handles parameter changes (sliders, toggles, dropdowns)
+                    moduleId = parseInt(element.dataset.moduleId, 10); // This should be 9 for Clone Mode parameters
                     fxId = parseInt(element.dataset.fxId, 10); 
                     algId = parseInt(element.dataset.algId, 10);
-
+                    
+                    // --- CORRECTED LOGIC FOR PARAMETERS ---
+                    // Since the parameter controls are rebuilt with data-module-id="9" when in Clone Mode,
+                    // we must ensure the lookup *uses* 9 and does not mistakenly fall back to 3.
+                    // We use the parameter's dataset value directly for lookup.
+                    lookupModuleId = moduleId; 
+                    
+                    // --- CRITICAL CHECK ---
+                    // If the element's data-module-id is *physically* 3 but its effect type is Clone (FXID >= 901),
+                    // we might still need to reroute. Given your setup rebuilds controls with ID 9:
+                    if (moduleId === 3 && document.getElementById('amp-clone-mode').classList.contains('on')) {
+                        // This case should ideally not happen if controls are built correctly, 
+                        // but if it does, force use 9.
+                        lookupModuleId = 9; 
+                    }
+                    // ----------------------------------------
+                    
                     if (element.classList.contains('toggle-switch')) {
                         value = element.classList.contains('on') ? 1 : 0;
                     } else {
                         value = parseFloat(element.value);
                     }
                     
-                    this.log(`UI Change: M${moduleId}.E${fxId}.A${algId} = ${value}`, 'info');
-                    command = this.commands.parameters?.[moduleId]?.[algId]?.[value];
+                    this.log(`UI Change: M${moduleId}.E${fxId}.A${algId} = ${value} (Lookup ID: ${lookupModuleId})`, 'info');
+                    
+                    // Use the explicit lookupModuleId (which will be 9 if set correctly)
+                    command = this.commands.parameters?.[lookupModuleId]?.[algId]?.[value];
                 }
-
+            
                 if (command && !this.isPresetModified && !this.isApplyingState) {
-        		    this.isPresetModified = true;
-        		    this.updatePresetModifiedUI(true);
-        		}
-
+                    this.isPresetModified = true;
+                    this.updatePresetModifiedUI(true);
+                }
+            
                 if (command) {
                     this.writeCommand(command);
                 } else {
@@ -11606,11 +12000,15 @@
                 // Pre-fill the dialog with the currently selected patch info
                 const currentPatchNumText = document.getElementById('patchNumber').textContent;
                 const currentPatchName = document.getElementById('patchName').textContent;
+
+                // 1. Remove the trailing asterisk and any space before it.
+                // 2. Trim any remaining leading/trailing whitespace.
+                const cleanedName = currentPatchName.replace(/\s*\*$/, '').trim();
                 
                 // Extract only the number from "PXX" or "FXX"
                 const currentPatchNum = parseInt(currentPatchNumText.substring(1), 10);
             
-                this.presetNameInput.value = currentPatchName;
+                this.presetNameInput.value = cleanedName;
                 this.presetNumberInput.value = currentPatchNum;
                 
                 this.saveModal.style.display = 'block';
@@ -11639,7 +12037,7 @@
             }
 
 
-			async runInitialSyncSequence() {
+            async runInitialSyncSequence() {
                 this.log('Starting initial auto-sync sequence...', 'info');
                 const overlay = document.getElementById('lockingOverlay');
                 const overlayText = overlay.querySelector('p:first-child');
@@ -11896,7 +12294,7 @@
                                 wasSaved = true;
                                 
                                 this.updateUIAfterSave(presetNumber, presetName);
-            					this.isPresetModified = false;
+                                this.isPresetModified = false;
                                 this.updatePresetModifiedUI(false);
 
                                 x = 16; y = 16; // Break outer loops
@@ -11920,7 +12318,6 @@
                 const data = new Uint8Array(event.target.value.buffer);
                 const hexString = Array.from(data).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
                 const SUCCESS_ACK_CODE = "8080F00B02000100000003010400080000F7";
-                const GLOBAL_SETTINGS_MARKER = "0407010201";
 
                 if (hexString === '8080F0070A000100000003010204050001F7') {
                     if (!this.isPresetModified) {
@@ -11940,7 +12337,7 @@
                 }
 
 
-                if (this.isWaitingForGlobals && hexString.includes(GLOBAL_SETTINGS_MARKER)) {
+                if (this.isWaitingForGlobals) {
                       this.isWaitingForGlobals = false; // Reset the flag
                       const decodedData = this.decodeGlobalSettings(hexString);
                       this.applyGlobalSettings(decodedData);
@@ -12404,44 +12801,44 @@
             }
 
             decodeParameterValues(dumpPackets, selectedEffects) {
-			    const decodedParams = {};
-			
-			    selectedEffects[0] = 1; //so we start at NR module that only has 1 fx slot
-			
-			    for (const moduleIdStr in selectedEffects) {
-			        const moduleId = parseInt(moduleIdStr, 10);
-			        const fxId = selectedEffects[moduleId];
-			        const effectDef = this.definitions.effectLibrary[fxId];
-			
-			        if (!effectDef || !effectDef.alg) continue;
-			
-			        decodedParams[moduleId] = {};
-			
-			        effectDef.alg.forEach(param => {
-			            const algId = param.algId;
-			            const mapKey = `${moduleId}_${algId}`;
-			            const location = this.ALGID_LOCATION_MAP[mapKey];
-			
-			            if (location) {
-			                const packet = dumpPackets[location.p];
-			                const bytes = packet ? packet.match(/.{1,2}/g) : null;
-			
-			                if (bytes && bytes.length >= location.o + 6) {
-			                    const hexBlock = bytes.slice(location.o, location.o + 6).join('');
-								const finalValue = this.decodeParameterValue(hexBlock);
+                const decodedParams = {};
+            
+                selectedEffects[0] = 1; //so we start at NR module that only has 1 fx slot
+            
+                for (const moduleIdStr in selectedEffects) {
+                    const moduleId = parseInt(moduleIdStr, 10);
+                    const fxId = selectedEffects[moduleId];
+                    const effectDef = this.definitions.effectLibrary[fxId];
+            
+                    if (!effectDef || !effectDef.alg) continue;
+            
+                    decodedParams[moduleId] = {};
+            
+                    effectDef.alg.forEach(param => {
+                        const algId = param.algId;
+                        const mapKey = `${moduleId}_${algId}`;
+                        const location = this.ALGID_LOCATION_MAP[mapKey];
+            
+                        if (location) {
+                            const packet = dumpPackets[location.p];
+                            const bytes = packet ? packet.match(/.{1,2}/g) : null;
+            
+                            if (bytes && bytes.length >= location.o + 6) {
+                                const hexBlock = bytes.slice(location.o, location.o + 6).join('');
+                                const finalValue = this.decodeParameterValue(hexBlock);
 
-			                    if (finalValue !== null) {
-			                        this.log(`✔ Decoded Param: M${moduleId}.A${algId} (${param.name}) -> ${finalValue}`, 'info');
-			                        decodedParams[moduleId][algId] = finalValue;
-			                    } else {
-			                        this.log(`❌ Could not decode hex '${hexBlock}' for M${moduleId}.A${algId}`, 'error');
-			                    }
-			                }
-			            }
-			        });
-			    }
-			    return { parameters: decodedParams };
-			}
+                                if (finalValue !== null) {
+                                    this.log(`✔ Decoded Param: M${moduleId}.A${algId} (${param.name}) -> ${finalValue}`, 'info');
+                                    decodedParams[moduleId][algId] = finalValue;
+                                } else {
+                                    this.log(`❌ Could not decode hex '${hexBlock}' for M${moduleId}.A${algId}`, 'error');
+                                }
+                            }
+                        }
+                    });
+                }
+                return { parameters: decodedParams };
+            }
 
             applyPresetState(decodedData) {
                 this.log('Applying decoded state to UI...', 'info');
@@ -12492,6 +12889,16 @@
                         if (decodedData.selectedEffects) {
                             Object.entries(decodedData.selectedEffects).forEach(([moduleIdStr, fxId]) => {
                                 const decodedModuleId = parseInt(moduleIdStr, 10);
+
+                                 // --- AMP/CLONE STATE CAPTURE FIX ---
+                                // If the decoded effect is for the Amp (ID 3) or Clone (ID 9) module,
+                                // update the internal storage to reflect the new preset state.
+                                if (decodedModuleId === 3) {
+                                    this.ampModeFxId3 = fxId;
+                                } else if (decodedModuleId === 9) {
+                                    this.ampModeFxId9 = fxId;
+                                }
+                
                                 let targetModuleId = (decodedModuleId === 9 && cloneModeToggle.classList.contains('on')) || (decodedModuleId === 3 && !cloneModeToggle.classList.contains('on')) ? 3 : decodedModuleId;
             
                                 if (decodedModuleId === 9 && !cloneModeToggle.classList.contains('on')) return;
@@ -12846,9 +13253,9 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-		    window.bleEditor = new SonicakeBLEEditor();
-		    window.bleEditor.startEditor(); // Automatically start the editor on page load
-		});
+            window.bleEditor = new SonicakeBLEEditor();
+            window.bleEditor.startEditor(); // Automatically start the editor on page load
+        });
     </script>
 </body>
 </html>
