@@ -15,6 +15,7 @@ It was created as a fun side project using 99% AI programming logic and 100% har
 * **Automatic Sync:** Upon connecting, the app automatically syncs all preset names, effect types, user-loaded IRs, and global settings from your device, ensuring the editor always matches your hardware.  
 * **Unsaved Preset Warning:** The app tracks your changes and warns you if you try to switch presets without saving your modifications.  
 * **Advanced Debugging Tools:** A hidden log panel contains manual sync buttons and a communication log for troubleshooting.
+* **Tap Tempo:** Use a tap tempo button to calculate milliseconds for delay settings, with 1/8, 1/8 Dotted, 1/4 and 1/2 setting.
 
 ## **Requirements**
 
