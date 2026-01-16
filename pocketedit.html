@@ -872,6 +872,48 @@
             transition: color 0.2s ease; /* Optional: adds a smooth fade to red */
         }
 
+        /* USB MIDI Device Selection Styles */
+        .usb-device-pair {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #2a2a2a;
+            border: 2px solid #444;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .usb-device-pair:hover {
+            border-color: #666;
+            background: #333;
+        }
+
+        .usb-device-pair.selected {
+            border-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .usb-device-pair-title {
+            font-weight: bold;
+            color: #ff6b35;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+
+        .usb-device-io {
+            font-size: 11px;
+            color: #aaa;
+            margin: 2px 0;
+            padding-left: 12px;
+        }
+
+        .usb-device-io-label {
+            color: #888;
+            font-weight: bold;
+            min-width: 50px;
+            display: inline-block;
+        }
+
 
 
     </style>
@@ -1309,6 +1351,21 @@
     <div>
         <p>Trying to save preset...</p>
         <p style="font-size: 0.8em; color: #aaa; margin-top: 5px;">This could take up to 2 minutes!</p>
+    </div>
+</div>
+
+<!-- USB MIDI Device Selection Modal -->
+<div id="usbMidiModal" class="advanced-settings-panel" style="top: 50%; left: 50%; transform: translate(-50%, -50%); width: 450px; display: none;">
+    <h4>Select USB MIDI Device</h4>
+    <div style="margin: 20px 0;">
+        <p style="color: #ccc; font-size: 12px; margin-bottom: 15px;">Found USB MIDI devices. Please select one pair (input and output):</p>
+        <div id="usbDeviceList" style="background: #1e1e1e; border: 1px solid #444; border-radius: 4px; max-height: 250px; overflow-y: auto; margin-bottom: 15px;">
+            <!-- Device pairs will be populated here -->
+        </div>
+    </div>
+    <div style="display: flex; gap: 10px; margin-top: 15px;">
+        <button id="cancelUsbBtn" class="btn">Cancel (Use BLE)</button>
+        <button id="confirmUsbBtn" class="btn btn-primary" disabled>Connect via USB</button>
     </div>
 </div>
 
@@ -9741,6 +9798,16 @@
                 this.ackPromiseResolve = null;
                 this.isSyncingState = false;
                 this.syncTimeoutId = null;
+
+                // USB MIDI connection properties
+                this.connectionType = null; // 'ble' or 'usb'
+                this.midiInput = null;
+                this.midiOutput = null;
+                this.midiAccess = null;
+                this.usbDevicePairs = []; // Array of { input, output, inputName, outputName }
+                this.selectedUsbDevice = null; // { input, output, name }
+                this.usbMidiBuffer = null; // Buffer for USB MIDI message fragments
+                this.usbMultiPacketResponses = {}; // Track multi-packet SysEx responses by ID
                 this.isWaitingForPresetNumber = false;
                 this.saveModal = null;
                 this.lockingOverlay = null;
@@ -11200,6 +11267,12 @@
                 this.confirmSaveBtn = document.getElementById('confirmSaveBtn');
                 this.cancelSaveBtn = document.getElementById('cancelSaveBtn');
 
+                // USB MIDI modal elements
+                this.usbMidiModal = document.getElementById('usbMidiModal');
+                this.usbDeviceList = document.getElementById('usbDeviceList');
+                this.confirmUsbBtn = document.getElementById('confirmUsbBtn');
+                this.cancelUsbBtn = document.getElementById('cancelUsbBtn');
+
                 // Add a global keydown listener for the space bar to control tap tempo.
                 document.addEventListener('keydown', (e) => {
                      // Get the currently focused element on the page.
@@ -11566,6 +11639,10 @@
                 this.savePresetBtn.addEventListener('click', () => this.showSaveModal());
                 this.cancelSaveBtn.addEventListener('click', () => this.hideSaveModal());
                 this.confirmSaveBtn.addEventListener('click', () => this.saveCurrentPreset());
+
+                // USB MIDI modal event listeners
+                this.confirmUsbBtn.addEventListener('click', () => this.confirmUsbDeviceSelection());
+                this.cancelUsbBtn.addEventListener('click', () => this.cancelUsbDeviceSelection());
             }
 
             setupControlListeners() {
@@ -12040,6 +12117,185 @@
 
             async connect() {
                 try {
+                    // Step 1: Try to detect USB MIDI devices
+                    this.log('Checking for USB MIDI devices...', 'info');
+                    const hasUsbDevices = await this.detectAndListUsbMidiDevices();
+                    
+                    if (hasUsbDevices) {
+                        // Show the USB device selection modal
+                        this.log('USB MIDI devices found. Showing selection dialog...', 'info');
+                        this.showUsbMidiModal();
+                        // Wait for user to make a selection (handled by confirmUsbDeviceSelection/cancelUsbDeviceSelection)
+                        return;
+                    } else {
+                        // No USB devices found, proceed directly to BLE
+                        this.log('No USB MIDI devices found. Proceeding with Bluetooth connection...', 'info');
+                        await this.connectBLE();
+                    }
+                } catch (error) {
+                    this.log(`Connection initialization failed: ${error.message}`, 'error');
+                }
+            }
+
+            async detectAndListUsbMidiDevices() {
+                try {
+                    // Check if Web MIDI API is supported
+                    if (!navigator.requestMIDIAccess) {
+                        this.log('Web MIDI API not supported in this browser', 'info');
+                        return false;
+                    }
+
+                    // Request MIDI access
+                    this.midiAccess = await navigator.requestMIDIAccess({ sysex: true });
+                    
+                    // Get all inputs and outputs
+                    const inputs = Array.from(this.midiAccess.inputs.values());
+                    const outputs = Array.from(this.midiAccess.outputs.values());
+                    
+                    if (inputs.length === 0 || outputs.length === 0) {
+                        this.log('No USB MIDI input or output devices found', 'info');
+                        return false;
+                    }
+
+                    // Group inputs and outputs by device name (they usually share the same name)
+                    const deviceMap = new Map();
+                    
+                    inputs.forEach(input => {
+                        const name = input.name || 'Unknown Input';
+                        if (!deviceMap.has(name)) {
+                            deviceMap.set(name, { input: null, output: null, inputName: name, outputName: '' });
+                        }
+                        const device = deviceMap.get(name);
+                        device.input = input;
+                    });
+
+                    outputs.forEach(output => {
+                        const name = output.name || 'Unknown Output';
+                        // Check for matching input with the same name or partial name match
+                        let foundMatch = false;
+                        for (const [key, device] of deviceMap.entries()) {
+                            if (key === name || name.startsWith(key.split(' ')[0])) {
+                                device.output = output;
+                                device.outputName = name;
+                                foundMatch = true;
+                                break;
+                            }
+                        }
+                        // If no match found, create a new entry
+                        if (!foundMatch) {
+                            deviceMap.set(name, { input: null, output: output, inputName: '', outputName: name });
+                        }
+                    });
+
+                    // Filter to only devices that have both input and output
+                    this.usbDevicePairs = Array.from(deviceMap.values())
+                        .filter(pair => pair.input && pair.output)
+                        .map(pair => ({
+                            input: pair.input,
+                            output: pair.output,
+                            inputName: pair.inputName,
+                            outputName: pair.outputName,
+                            name: pair.inputName || pair.outputName
+                        }));
+
+                    this.log(`Found ${this.usbDevicePairs.length} USB MIDI device pair(s)`, 'info');
+                    
+                    return this.usbDevicePairs.length > 0;
+                } catch (error) {
+                    this.log(`Error accessing MIDI devices: ${error.message}`, 'error');
+                    return false;
+                }
+            }
+
+            showUsbMidiModal() {
+                this.usbDeviceList.innerHTML = '';
+                this.confirmUsbBtn.disabled = true;
+                this.selectedUsbDevice = null;
+
+                // Create device selection items
+                this.usbDevicePairs.forEach((pair, index) => {
+                    const deviceItem = document.createElement('div');
+                    deviceItem.className = 'usb-device-pair';
+                    deviceItem.dataset.deviceIndex = index;
+                    
+                    const deviceName = pair.name || `Device ${index + 1}`;
+                    const inputName = pair.inputName || 'Unknown';
+                    const outputName = pair.outputName || 'Unknown';
+                    
+                    deviceItem.innerHTML = `
+                        <div class="usb-device-pair-title">🎛️ ${deviceName}</div>
+                        <div class="usb-device-io">
+                            <span class="usb-device-io-label">Input:</span> ${inputName}
+                        </div>
+                        <div class="usb-device-io">
+                            <span class="usb-device-io-label">Output:</span> ${outputName}
+                        </div>
+                    `;
+                    
+                    deviceItem.addEventListener('click', () => this.selectUsbDevice(index, deviceItem));
+                    this.usbDeviceList.appendChild(deviceItem);
+                });
+
+                // Show the modal
+                this.usbMidiModal.style.display = 'block';
+            }
+
+            selectUsbDevice(index, element) {
+                // Remove previous selection
+                document.querySelectorAll('.usb-device-pair').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                
+                // Mark new selection
+                element.classList.add('selected');
+                this.selectedUsbDevice = this.usbDevicePairs[index];
+                this.confirmUsbBtn.disabled = false;
+                this.log(`Selected USB MIDI device: ${this.selectedUsbDevice.name}`, 'info');
+            }
+
+            confirmUsbDeviceSelection() {
+                if (!this.selectedUsbDevice) {
+                    alert('Please select a USB MIDI device first');
+                    return;
+                }
+                
+                this.usbMidiModal.style.display = 'none';
+                this.connectUSB(this.selectedUsbDevice);
+            }
+
+            cancelUsbDeviceSelection() {
+                this.usbMidiModal.style.display = 'none';
+                this.log('USB device selection cancelled. Falling back to Bluetooth...', 'info');
+                // Proceed with BLE connection
+                this.connectBLE();
+            }
+
+            async connectUSB(usbDevice) {
+                try {
+                    this.midiInput = usbDevice.input;
+                    this.midiOutput = usbDevice.output;
+                    this.connectionType = 'usb';
+
+                    // Reset USB MIDI buffer before attaching listener
+                    this.usbMidiBuffer = null;
+
+                    // Set up MIDI input listener
+                    this.midiInput.onmidimessage = (event) => this.handleMidiMessage(event);
+
+                    this.isConnected = true;
+                    this.updateConnectionUI();
+                    this.log(`✅ USB MIDI Connected: ${usbDevice.name}`, 'received');
+                    
+                    await this.runInitialSyncSequence();
+                } catch (error) {
+                    this.log(`USB MIDI connection failed: ${error.message}`, 'error');
+                    this.log('Falling back to Bluetooth connection...', 'info');
+                    await this.connectBLE();
+                }
+            }
+
+            async connectBLE() {
+                try {
                     this.log('Requesting Bluetooth device...', 'sent');
                     this.device = await navigator.bluetooth.requestDevice({
                         filters: [{ name: 'Sonic Master BLE' }, { services: [this.SERVICE_UUID] }],
@@ -12057,22 +12313,168 @@
                     this.characteristic = await service.getCharacteristic(this.CHARACTERISTIC_UUID);
                     await this.characteristic.startNotifications();
                     this.characteristic.addEventListener('characteristicvaluechanged', (event) => this.handleNotification(event));
+                    
+                    this.connectionType = 'ble';
                     this.isConnected = true;
                     this.updateConnectionUI();
                     this.log('✅ Connected successfully!', 'received');
             
                     this.runInitialSyncSequence();
-
-            
                 } catch (error) {
-                    this.log(`Connection failed: ${error.message}`, 'error');
+                    this.log(`Bluetooth connection failed: ${error.message}`, 'error');
+                    alert('Failed to connect to device. Please try again.');
+                }
+            }
+
+            handleMidiMessage(event) {
+                const data = event.data;
+                const dataHex = Array.from(data).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+                
+                // Check if this is a SysEx message (starts with F0 and ends with F7)
+                if (data.length < 4 || data[0] !== 0xF0 || data[data.length - 1] !== 0xF7) {
+                    // Not a complete SysEx message, buffer it
+                    if (this.usbMidiBuffer === null) {
+                        this.usbMidiBuffer = new Uint8Array(data);
+                    } else {
+                        const combined = new Uint8Array(this.usbMidiBuffer.length + data.length);
+                        combined.set(this.usbMidiBuffer);
+                        combined.set(data, this.usbMidiBuffer.length);
+                        this.usbMidiBuffer = combined;
+                    }
+                    const bufferHex = Array.from(this.usbMidiBuffer).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+                    this.log(`USB MIDI Buffer (incomplete): ${bufferHex}`, 'debug');
+                    return;
+                }
+
+                // We have a complete SysEx message
+                let message = data;
+                
+                // If there was a partial buffer, concatenate with it
+                if (this.usbMidiBuffer !== null) {
+                    const combined = new Uint8Array(this.usbMidiBuffer.length + data.length);
+                    combined.set(this.usbMidiBuffer);
+                    combined.set(data, this.usbMidiBuffer.length);
+                    message = combined;
+                    this.usbMidiBuffer = null;
+                }
+
+                // Check if this is a multi-packet response
+                // Bytes [3:4] = total number of packets (16-bit big-endian)
+                // Bytes [5:6] = current packet number (16-bit big-endian)
+                const totalPackets = (message[3] << 8) | message[4];
+                const currentPacket = (message[5] << 8) | message[6];
+
+                const messageHex = Array.from(message).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+                this.log(`USB SysEx: packets ${currentPacket}/${totalPackets} - ${messageHex}`, 'debug');
+
+                if (totalPackets > 1) {
+                    // Multi-packet response - buffer and reassemble
+                    if (!this.usbMultiPacketResponses) {
+                        this.usbMultiPacketResponses = {};
+                    }
+
+                    // Use bytes [3:4] (total packets indicator) as the response ID
+                    // This is stable across all packets of the same multi-packet response
+                    // Bytes [1:2] are CRC and vary per packet, so we don't use them
+                    const responseId = `${message[3]}_${message[4]}`;
+
+                    if (!this.usbMultiPacketResponses[responseId]) {
+                        this.usbMultiPacketResponses[responseId] = {
+                            totalPackets: totalPackets,
+                            packets: {},
+                            startTime: Date.now()
+                        };
+                    }
+
+                    const response = this.usbMultiPacketResponses[responseId];
+
+                    // Store this packet
+                    response.packets[currentPacket] = message;
+                    this.log(`Buffered packet ${currentPacket + 1}/${totalPackets} for response [${responseId}]`, 'debug');
+
+                    // Check if we have all packets
+                    let allPacketsReceived = true;
+                    for (let i = 0; i < totalPackets; i++) {
+                        if (!(i in response.packets)) {
+                            allPacketsReceived = false;
+                            break;
+                        }
+                    }
+
+                    if (allPacketsReceived) {
+                        this.log(`✅ All ${totalPackets} packets received for [${responseId}]`, 'info');
+                        
+                        // Reassemble payload from all packets
+                        const reassembledPayload = [];
+                        for (let i = 0; i < totalPackets; i++) {
+                            const pkt = response.packets[i];
+                            // Payload starts at index 9, ends at length-1 (before F7)
+                            const payloadStart = 9;
+                            const payloadEnd = pkt.length - 1;
+                            for (let j = payloadStart; j < payloadEnd; j++) {
+                                reassembledPayload.push(pkt[j]);
+                            }
+                        }
+
+                        // Create a synthetic single-packet message with the reassembled payload
+                        const singlePacketMessage = new Uint8Array(reassembledPayload.length + 10);
+                        singlePacketMessage[0] = 0xF0; // SysEx start
+                        singlePacketMessage[1] = message[1]; // Manufacturer ID byte 1
+                        singlePacketMessage[2] = message[2]; // Manufacturer ID byte 2
+                        singlePacketMessage[3] = 0x00; // Single packet indicator
+                        singlePacketMessage[4] = 0x01;
+                        singlePacketMessage[5] = 0x00;
+                        singlePacketMessage[6] = 0x00;
+                        singlePacketMessage[7] = 0x00; // Unused
+                        singlePacketMessage[8] = 0x00;
+                        // Copy reassembled payload starting at index 9
+                        for (let i = 0; i < reassembledPayload.length; i++) {
+                            singlePacketMessage[9 + i] = reassembledPayload[i];
+                        }
+                        singlePacketMessage[singlePacketMessage.length - 1] = 0xF7; // SysEx end
+
+                        const reassembledHex = Array.from(singlePacketMessage).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+                        this.log(`Reassembled payload: ${reassembledHex}`, 'info');
+
+                        // Process as a single message with 8080 header
+                        const dataWithHeader = new Uint8Array([0x80, 0x80, ...singlePacketMessage]);
+                        this.handleNotification({ target: { value: { buffer: dataWithHeader.buffer } } });
+
+                        // Clean up
+                        delete this.usbMultiPacketResponses[responseId];
+                    } else {
+                        // Set a timeout in case we don't receive all packets
+                        setTimeout(() => {
+                            if (this.usbMultiPacketResponses && this.usbMultiPacketResponses[responseId]) {
+                                const received = Object.keys(this.usbMultiPacketResponses[responseId].packets).length;
+                                this.log(`⚠️ Timeout waiting for multi-packet response [${responseId}]: received ${received}/${totalPackets}`, 'warn');
+                                delete this.usbMultiPacketResponses[responseId];
+                            }
+                        }, 2000);
+                    }
+                } else {
+                    // Single packet - process immediately
+                    const dataWithHeader = new Uint8Array([0x80, 0x80, ...message]);
+                    this.handleNotification({ target: { value: { buffer: dataWithHeader.buffer } } });
                 }
             }
 
             async disconnect() {
+                // Handle BLE disconnection
                 if (this.device && this.device.gatt.connected) {
                     await this.device.gatt.disconnect();
                 }
+                
+                // Handle USB disconnection
+                if (this.midiInput) {
+                    this.midiInput.onmidimessage = null;
+                    this.midiInput = null;
+                }
+                if (this.midiOutput) {
+                    this.midiOutput = null;
+                }
+                
+                this.connectionType = null;
                 this.isConnected = false;
                 this.isSyncing = false;
                 this.updateConnectionUI();
@@ -12081,6 +12483,8 @@
 
             updateConnectionUI() {
                 const isConnected = this.isConnected;
+                const statusLabel = this.connectionType === 'usb' ? 'USB Connected' : this.connectionType === 'ble' ? 'BLE Connected' : 'Disconnected';
+                
                 this.connectBtn.disabled = isConnected;
                 this.disconnectBtn.disabled = !isConnected;
                 this.syncPresetNamesBtn.disabled = !isConnected;
@@ -12089,19 +12493,31 @@
                 this.syncCloneAmpsBtn.disabled = !isConnected;
                 this.syncGlobalsBtn.disabled = !isConnected;
                 this.statusDot.classList.toggle('connected', isConnected);
-                this.statusText.textContent = isConnected ? 'Connected' : 'Disconnected';
+                this.statusText.textContent = statusLabel;
             }
 
             async writeCommand(commandString) {
-                if (!this.characteristic) {
+                if (!this.isConnected) {
                     this.log('Device not connected', 'error');
                     return;
                 }
+                
                 try {
                     const hexBytes = commandString.match(/.{1,2}/g).map(byte => parseInt(byte, 16));
                     const command = new Uint8Array(hexBytes);
                     this.log(`Sending: ${commandString.toUpperCase()}`, 'sent');
-                    await this.characteristic.writeValueWithoutResponse(command);
+                    
+                    // Send via USB MIDI or BLE depending on connection type
+                    if (this.connectionType === 'usb' && this.midiOutput) {
+                        // Send via Web MIDI API (remove 8080 header - USB MIDI adds it automatically)
+                        const commandWithoutHeader = command.slice(2); // Remove first 2 bytes (8080)
+                        this.midiOutput.send(commandWithoutHeader);
+                    } else if (this.connectionType === 'ble' && this.characteristic) {
+                        // Send via BLE GATT characteristic (keep 8080 header)
+                        await this.characteristic.writeValueWithoutResponse(command);
+                    } else {
+                        this.log('No valid connection endpoint available', 'error');
+                    }
                 } catch (error) {
                     this.log(`Error sending command: ${error.message}`, 'error');
                 }
@@ -12545,19 +12961,31 @@
                     return;
                 }
                 
-                const fixedPayloadStart = hexString.substring(10);
-                if (hexString.startsWith('8080F0') && fixedPayloadStart.startsWith('00010000050701020204')) {
-                    this.log('Received Clone Amp name data.', 'received');
-                    this.decodeAndApplyUserNames(hexString, 'Clone');
-                     if (this.cloneNamePromiseResolve) this.cloneNamePromiseResolve();
-                    return;
-                }
-
-                if (hexString.startsWith('8080F0') && fixedPayloadStart.startsWith('00010000050701020200')) {
-                    this.log('Received User IR name data.', 'received');
-                    this.decodeAndApplyUserNames(hexString, 'IR');
-                    if (this.irNamePromiseResolve) this.irNamePromiseResolve();
-                    return;
+                // Flexible pattern matching: Search for key identifying bytes anywhere in the message
+                // This handles both USB and BLE formats which may have different status bytes at different positions
+                // Now also works with reassembled multi-packet USB responses
+                if (hexString.startsWith('8080F0')) {
+                    // CLONE AMP SIGNATURE: "00010000050701020204"
+                    // This 10-byte sequence uniquely identifies Clone Amp name data
+                    // It appears in the same position regardless of USB fragmentation
+                    // if (hexString.indexOf('00010000050701020204') >= 0) {
+                    if (hexString.indexOf('01020204') >= 0) {
+                        this.log('Received Clone Amp name data (signature found).', 'received');
+                        this.decodeAndApplyUserNames(hexString, 'Clone');
+                        if (this.cloneNamePromiseResolve) this.cloneNamePromiseResolve();
+                        return;
+                    }
+                    
+                    // USER IR SIGNATURE: "00010000050701020200"
+                    // This 10-byte sequence uniquely identifies User IR name data
+                    // It appears in the same position regardless of USB fragmentation
+                    // if (hexString.indexOf('00010000050701020200') >= 0) {
+                    if (hexString.indexOf('01020200') >= 0) {
+                        this.log('Received User IR name data (signature found).', 'received');
+                        this.decodeAndApplyUserNames(hexString, 'IR');
+                        if (this.irNamePromiseResolve) this.irNamePromiseResolve();
+                        return;
+                    }
                 }
 
                 if (this.isWaitingForPresetNumber) {
