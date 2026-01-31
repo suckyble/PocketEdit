@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Pedal Batch Cracker v20</title>
+    <title>Pedal Batch Cracker v27</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #1a1a1a; color: #e0e0e0; padding: 20px; }
         .container { max-width: 1000px; margin: 0 auto; }
@@ -12,7 +12,7 @@
         #progressBar { width: 0%; height: 100%; background-color: #00a300; transition: width 0.1s; }
         #subStatus { font-size: 11px; color: #888; margin-top: 5px; font-family: monospace; text-align: right; display: block; }
         textarea { width: 100%; height: 100px; background: #252525; color: #00ff00; border: 1px solid #444; padding: 10px; font-family: monospace; border-radius: 5px; width: -webkit-fill-available; }
-        #log { height: 160px; background: #000; border: 1px solid #333; overflow-y: scroll; padding: 10px; font-family: monospace; font-size: 11px; border-radius: 5px; margin-bottom: 10px; white-space: pre-wrap; }
+        #log { height: 200px; background: #000; border: 1px solid #333; overflow-y: scroll; padding: 10px; font-family: monospace; font-size: 11px; border-radius: 5px; margin-bottom: 10px; white-space: pre-wrap; }
         .controls { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 15px 0; }
         button { padding: 12px; font-weight: bold; cursor: pointer; border-radius: 5px; border: none; background: #333; color: white; transition: 0.2s; font-size: 12px; }
         #connectBtn { background: #2b5797; }
@@ -36,7 +36,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Pedal Cracker v20</h1>
+        <h1>Pedal Cracker v27</h1>
         <textarea id="payloadInput" placeholder="Paste logs here (Batch Mode)..."></textarea>
         <div class="controls">
             <button id="connectBtn">1. Connect</button>
@@ -51,13 +51,15 @@
             <span id="subStatus">Idle</span>
         </div>
         <div id="log"></div>
+
         <div class="manual-section">
             <h3 style="margin:0">Manual Single-Command Test</h3>
             <div class="manual-input-row">
-                <input type="text" id="manualInput" placeholder="Enter full hex command...">
-                <button id="manualTestBtn" disabled>Test Code</button>
+                <input type="text" id="manualInput" placeholder="Paste full 20-byte command to verify...">
+                <button id="manualTestBtn" disabled>Verify Code</button>
             </div>
         </div>
+
         <div class="results-container">
             <div class="box success-box">
                 <h3 style="margin:0">Verified Results (<span id="successCount">0</span>)</h3>
@@ -73,20 +75,22 @@
     <script>
         const SERVICE_UUID = '03b80e5a-ede8-4b33-a751-6ce34ec4c700';
         const CHARACTERISTIC_UUID = '7772e5db-3868-4112-a1a9-f2669d106bf3';
-        const SUCCESS_ACK_CODE = "8080f00b02000100000003010400080000f7";
+        const SUCCESS_ACK_PREFIX = "8080f00b02"; 
+        const ERROR_NACK = "8080f00b05000100000003010400080001f7";
 
         let device, characteristic, ackResolver;
         let lastCommand = "NONE", secondLastCommand = "NONE";
         let sessionResults = [], isAborting = false;
 
-        const yieldToMain = () => new Promise(resolve => setTimeout(resolve, 0));
+        const yieldToMain = () => new Promise(resolve => setTimeout(resolve, 10));
 
         function log(msg, color = "#e0e0e0") {
             const span = document.createElement('div');
             span.style.color = color;
             span.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-            document.getElementById('log').appendChild(span);
-            document.getElementById('log').scrollTop = document.getElementById('log').scrollHeight;
+            const logEl = document.getElementById('log');
+            logEl.appendChild(span);
+            logEl.scrollTop = logEl.scrollHeight;
         }
 
         document.getElementById('connectBtn').onclick = async () => {
@@ -97,34 +101,23 @@
                 characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
                 await characteristic.startNotifications();
                 characteristic.addEventListener('characteristicvaluechanged', (e) => {
-                    const hex = Array.from(new Uint8Array(e.target.value.buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-                    if (hex.toLowerCase() === SUCCESS_ACK_CODE.toLowerCase() && ackResolver) ackResolver(true);
+                    const hex = Array.from(new Uint8Array(e.target.value.buffer)).map(b => b.toString(16).padStart(2, '0')).join('').toLowerCase();
+                    if (ackResolver) {
+                        const elapsed = Date.now() - ackResolver.startTime;
+                        ackResolver.resolve({ hex, elapsed });
+                    }
                 });
-                const btn = document.getElementById('connectBtn');
-                btn.disabled = true;
-                btn.textContent = "Connected";
+                document.getElementById('connectBtn').disabled = true;
+                document.getElementById('connectBtn').textContent = "Connected";
                 document.getElementById('startBtn').disabled = false;
                 document.getElementById('manualTestBtn').disabled = false;
                 log("Connected.", "#00ff00");
             } catch (err) { log("Error: " + err.message, "#ff4444"); }
         };
 
-        // ABORT BUTTON FIX
         document.getElementById('abortBtn').onclick = () => {
             isAborting = true;
-            log("🛑 Abort clicked: Finishing and moving to verification pass.", "#ff9900");
-        };
-
-        // CLEAR ALL FIX: Clears log, memory, and UI
-        document.getElementById('clearBtn').onclick = () => {
-            if(confirm("Clear log and all session results?")) { 
-                sessionResults = []; 
-                document.getElementById('log').innerHTML = "";
-                document.getElementById('successCount').textContent = "0";
-                document.getElementById('candidateCount').textContent = "0";
-                updateUI(); 
-                log("Session and log cleared.", "#87cefa");
-            }
+            log("🛑 Abort clicked: Breaking Search and jumping to Verification...", "#ff9900");
         };
 
         async function writeCommand(cmd) {
@@ -133,27 +126,36 @@
             await characteristic.writeValueWithoutResponse(bytes);
         }
 
-        function waitForAck(timeout = 250) {
+        function waitForResponse(timeout = 300) {
+            const startTime = Date.now();
             return new Promise(res => {
-                ackResolver = res;
-                setTimeout(() => { ackResolver = null; res(false); }, timeout);
+                ackResolver = { resolve: res, startTime: startTime };
+                setTimeout(() => { if (ackResolver && ackResolver.startTime === startTime) res({ hex: "TIMEOUT", elapsed: timeout }); }, timeout);
             });
+        }
+
+        function getResponseStatus(hex) {
+            if (hex === "TIMEOUT") return "TIMEOUT";
+            if (hex.startsWith(SUCCESS_ACK_PREFIX)) return "SUCCESS";
+            if (hex === ERROR_NACK.toLowerCase()) return "ERROR_NACK";
+            return "UNKNOWN_NOTIF";
         }
 
         window.manualVerify = async (id) => {
             const item = sessionResults.find(r => r.id === id);
-            log(`Manual Check: ${item.cmd}`, "#8e44ad");
+            log(`Checking Candidate: ${item.cmd.substring(6,10)}...`, "#8e44ad");
             await writeCommand(item.cmd);
-            if (await waitForAck(500)) {
-                item.verified = true;
-                log("ACK Received! Verified.", "#00ff00");
+            const response = await waitForResponse(800);
+            const status = getResponseStatus(response.hex);
+            if (status === "SUCCESS" || status === "UNKNOWN_NOTIF") {
+                item.verified = true; log("Verified!", "#00ff00");
             } else {
-                log("Fail. Trying Backup...", "#ff9900");
+                log(`Failed. Testing backup...`, "#ff9900");
                 await writeCommand(item.backup);
-                if (await waitForAck(500)) {
-                    item.cmd = item.backup; item.verified = true;
-                    log("Backup ACK Received! Verified.", "#00ff00");
-                } else { log("Fail.", "#ff4444"); }
+                const respB = await waitForResponse(800);
+                if (getResponseStatus(respB.hex) !== "ERROR_NACK" && respB.hex !== "TIMEOUT") {
+                    item.cmd = item.backup; item.verified = true; log("Backup Verified!", "#00ff00");
+                } else { log("Verify failed.", "#ff4444"); }
             }
             updateUI();
         };
@@ -177,12 +179,14 @@
         }
 
         document.getElementById('manualTestBtn').onclick = async () => {
-            const cmd = document.getElementById('manualInput').value.trim().replace(/\s/g, '');
+            let cmd = document.getElementById('manualInput').value.trim().replace(/\s/g, '');
             if (!cmd) return;
+            if (cmd.includes('010204')) cmd = cmd.replace('010204', '010104');
             log(`Manual Test: ${cmd}`, "#8e44ad");
             await writeCommand(cmd);
-            if (await waitForAck(500)) log("MANUAL SUCCESS: ACK received.", "#00ff00");
-            else log("MANUAL FAILED: No response.", "#ff4444");
+            const res = await waitForResponse(800);
+            const status = getResponseStatus(res.hex);
+            log(`Result: ${status}`, (status === "SUCCESS" || status === "UNKNOWN_NOTIF") ? "#00ff00" : "#ff4444");
         };
 
         document.getElementById('startBtn').onclick = async () => {
@@ -190,9 +194,8 @@
             const payloads = rawLines.map(line => {
                 let clean = line.replace(/\s/g, '');
                 if (clean.includes('010204')) clean = clean.replace('010204', '010104');
-                let final = clean;
-                if (clean.toLowerCase().startsWith('8080f0') && clean.toLowerCase().endsWith('f7')) final = clean.slice(10, -2);
-                return final;
+                if (clean.toLowerCase().startsWith('8080f0') && clean.toLowerCase().endsWith('f7')) clean = clean.slice(10, -2);
+                return clean;
             }).filter(p => p.length > 0);
 
             isAborting = false;
@@ -204,49 +207,57 @@
             for (let i = 0; i < payloads.length; i++) {
                 if (isAborting) break;
                 const p = payloads[i];
-                if (sessionResults.some(r => r.payload === p && r.verified)) continue;
+                
+                // CRITICAL FIX: SMART RESUME
+                if (sessionResults.some(r => r.payload === p && r.verified)) {
+                    log(`⏭️ Skipping payload ${i+1}: Already verified in list.`, "#aaa");
+                    continue;
+                }
 
-                document.getElementById('statusHeader').textContent = `Task: Finding Candidate ${i+1}/${payloads.length}`;
-                log(`Payload ${i+1}/${payloads.length}`, "#87cefa");
-
+                log(`SEARCH: Payload ${i+1}/${payloads.length}`, "#87cefa");
                 for (let x = 0; x < 256; x++) {
-                    if (isAborting) break; // Check for abort inside trial loop
+                    if (isAborting) break;
                     await yieldToMain();
                     document.getElementById('progressBar').style.width = ((x+1)/256)*100 + "%";
-                    document.getElementById('subStatus').textContent = `CRC Trial: ${x}/256`;
-                    
+                    document.getElementById('subStatus').textContent = `Trial: ${x}/256`;
                     const ck = `0${Math.floor(x/16).toString(16)}0${(x%16).toString(16)}`;
                     const cmd = `8080f0${ck}${p}f7`;
+                    ackResolver = null;
                     await writeCommand(cmd);
-                    
-                    if (await waitForAck(200)) {
-                        log(`Found Candidate CRC: ${ck}`, "#00ff00");
+                    const resp = await waitForResponse(220);
+                    if (getResponseStatus(resp.hex) === "SUCCESS" || getResponseStatus(resp.hex) === "UNKNOWN_NOTIF") {
+                        log(`MATCH: Found ${ck}.`, "#00ff00");
                         sessionResults.push({ id: Date.now() + x, payload: p, cmd, backup: secondLastCommand, verified: false });
                         break;
-                    }
-                    await new Promise(r => setTimeout(r, 45));
+                    } 
+                    await new Promise(r => setTimeout(r, 40));
                 }
             }
 
-            // PHASE 2: VERIFICATION (Runs even after abort for candidates found)
-            const candidates = sessionResults.filter(r => !r.verified);
-            if (candidates.length > 0) {
-                document.getElementById('statusHeader').textContent = "Task: Verification Pass...";
-                await new Promise(r => setTimeout(r, 500));
+            // PHASE 2: AUTO-VERIFY (Always runs for unverified candidates)
+            const toVerify = sessionResults.filter(r => !r.verified);
+            if (toVerify.length > 0) {
+                log(`AUTO-VERIFY: Starting pass for ${toVerify.length} candidates...`, "#ffff00");
                 document.getElementById('progressBar').style.backgroundColor = "#ffff00";
-
                 for (let i = 0; i < sessionResults.length; i++) {
-                    if (sessionResults[i].verified) continue;
-                    await yieldToMain(); // Yield here too
+                    const r = sessionResults[i];
+                    if (r.verified) continue;
+                    
                     document.getElementById('subStatus').textContent = `Verifying: ${i+1}/${sessionResults.length}`;
-                    await writeCommand(sessionResults[i].cmd);
-                    if (await waitForAck(400)) sessionResults[i].verified = true;
+                    await writeCommand(r.cmd);
+                    const resp = await waitForResponse(400);
+                    if (getResponseStatus(resp.hex) === "SUCCESS" || getResponseStatus(resp.hex) === "UNKNOWN_NOTIF") {
+                        r.verified = true;
+                        log(`OK: ${r.cmd.substring(6,10)} confirmed.`, "#00ff00");
+                    } else {
+                        log(`FAIL: ${r.cmd.substring(6,10)} did not ACK.`, "#ff4444");
+                    }
                     await new Promise(r => setTimeout(r, 100));
                 }
             }
 
             updateUI();
-            document.getElementById('statusHeader').textContent = isAborting ? "Task: Aborted (Verify Complete)" : "Task: Batch Ready.";
+            document.getElementById('statusHeader').textContent = isAborting ? "Aborted (Checked Candidates)" : "Finished.";
             document.getElementById('startBtn').disabled = false;
             document.getElementById('abortBtn').style.display = "none";
             document.getElementById('progressBar').style.backgroundColor = "#00a300";
@@ -259,6 +270,10 @@
             a.href = URL.createObjectURL(blob);
             a.download = `verified_commands.txt`;
             a.click();
+        };
+
+        document.getElementById('clearBtn').onclick = () => { 
+            if(confirm("Wipe everything?")) { sessionResults = []; document.getElementById('log').innerHTML = ""; updateUI(); } 
         };
     </script>
 </body>
