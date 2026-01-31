@@ -4,7 +4,7 @@ To communicate with the pedal, every command sent must be validated with a corre
 
 This approach was made possible by two key factors:
 
-1.  A reliable **success acknowledgement** and **nonsuccess acknowledgement** message sent back from the pedal upon receiving a valid command.
+1.  A reliable **success acknowledgement** and **nonsuccess acknowledgement** message sent back from the pedal upon sending a well formed command.
 2.  A surprisingly small **search space** for the checksum value.
 
 -----
