@@ -12365,7 +12365,7 @@
                 const currentPacket = (message[5] << 4) | message[6];
 
                 const messageHex = Array.from(message).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
-                this.log(`USB SysEx: packets ${currentPacket}/${totalPackets} - ${messageHex}`, 'debug');
+                this.log(`USB SysEx: packets ${currentPacket + 1}/${totalPackets} - ${messageHex}`, 'debug');
 
                 if (totalPackets > 1) {
                     // Multi-packet response - buffer and reassemble
@@ -12392,15 +12392,15 @@
                     response.packets[currentPacket] = message;
                     this.log(`Buffered packet ${currentPacket + 1}/${totalPackets} for response [${responseId}]`, 'debug');
 
-                    // Check if we have all packets
-                    //let allPacketsReceived = true;
-                    //for (let i = 0; i < totalPackets; i++) {
-                    //    if (!(i in response.packets)) {
-                    //        allPacketsReceived = false;
-                    //        break;
-                    //    }
-                    //}
-                    let allPacketsReceived = (currentPacket === totalPackets-1);
+                    // Check if we have all packets, supports out of order
+                    let allPacketsReceived = true;
+                    for (let i = 0; i < totalPackets; i++) {
+                        if (!(i in response.packets)) {
+                            allPacketsReceived = false;
+                            break;
+                        }
+                    }
+                    //let allPacketsReceived = (currentPacket === totalPackets-1); // Simple check
 
 
                     if (allPacketsReceived) {
@@ -12902,7 +12902,11 @@
                     
                     clearTimeout(this.nameSyncTimeoutId);
                 
-                    if (hexString === TERMINATOR_PACKET) {
+                    if (this.connectionType === 'usb') {
+                       this.log(`✅ Processing 1 USB SysEx data packet.`, 'info');
+                       this.dumpPackets.push(hexString);
+                       this.processAndDisplayDump();
+                    } else if (hexString === TERMINATOR_PACKET) {
                         this.log(`✅ Terminator packet received. Processing ${this.dumpPackets.length} data packets.`, 'success              ');
                         this.processAndDisplayDump();
                     } else {
@@ -12922,7 +12926,21 @@
                 
                 if (this.isWaitingForPresetDump && hexString.startsWith('8080F0') && hexString.endsWith('F7') && hexString.length > 50) {
                     this.dumpPackets.push(hexString);
-                    if (this.dumpPackets.length === 5) {
+                    if (this.dumpPackets.length === 5 || this.connectionType === 'usb') {
+
+                        // Work-around in case of USB MIDI, re-create the expected 5 (ble) packets ==========
+                        if (this.dumpPackets.length === 5 || this.connectionType === 'usb') {
+                            this.dumpPackets = [];
+                            const hdr = "8080F00706000100000000";
+                            let p1 = hdr + hexString.slice(22,422) + "F7";
+                            let p2 = hdr + hexString.slice(422,822) + "F7";
+                            let p3 = hdr + hexString.slice(822,1222) + "F7";
+                            let p4 = hdr + hexString.slice(1222,1622) + "F7";
+                            let p5 = hdr + hexString.slice(1622);
+                            this.dumpPackets.push(p1, p2, p3, p4, p5);
+                        }
+                        // ===================================================================================
+
                         clearTimeout(this.syncTimeoutId);
                         this.syncTimeoutId = null;
                         this.isWaitingForPresetDump = false;
@@ -13053,7 +13071,7 @@
                 this.isSyncing = false;
                 this.syncPresetNamesBtn.disabled = false;
                 this.syncPresetNamesBtn.textContent = 'Sync Preset Names';
-                this.log('All 20 name packets received. Processing...', 'info');
+                this.log('All SysEx name packets received. Processing...', 'info');
             
                 try {
                     const allNames = this.dumpPackets.flatMap(packet => this.parsePacketForNames(packet.slice(6, -2)));
