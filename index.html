@@ -12131,31 +12131,52 @@
             async connect() {
                 try {
                     this.log('Requesting Bluetooth device...', 'sent');
+                    // Filter specifically for the Sonic Master BLE device name [cite: 702]
                     this.device = await navigator.bluetooth.requestDevice({
                         filters: [{ name: 'Sonic Master BLE' }, { services: [this.SERVICE_UUID] }],
                         optionalServices: [this.SERVICE_UUID]
                     });
+            
                     this.log(`Found device: ${this.device.name}`, 'received');
+            
                     this.device.addEventListener('gattserverdisconnected', () => {
                         this.log('Device disconnected', 'error');
                         this.isConnected = false;
                         this.isSyncing = false;
                         this.updateConnectionUI();
                     });
+            
                     const server = await this.device.gatt.connect();
-                    const service = await server.getPrimaryService(this.SERVICE_UUID);
-                    this.characteristic = await service.getCharacteristic(this.CHARACTERISTIC_UUID);
+                    this.log('GATT Server connected. Retrieving services...', 'info');
+            
+                    try {
+                        // Attempt to retrieve the primary editor service 
+                        this.characteristic = await server.getPrimaryService(this.SERVICE_UUID)
+                            .then(service => service.getCharacteristic(this.CHARACTERISTIC_UUID));
+                    } catch (serviceError) {
+                        // DIAGNOSTIC LOG: This triggers if the device is paired but services are empty in chrome://bluetooth-internals
+                        this.log('⚠️ Error: Device connected but Services are hidden or empty.', 'error');
+                        this.log('Troubleshooting: Go to chrome://bluetooth-internals. If "Services" list is blank, "Forget" the device there and restart your Sonicake.', 'info');
+                        throw serviceError; 
+                    }
+            
                     await this.characteristic.startNotifications();
                     this.characteristic.addEventListener('characteristicvaluechanged', (event) => this.handleNotification(event));
+                    
                     this.isConnected = true;
                     this.updateConnectionUI();
                     this.log('✅ Connected successfully!', 'received');
             
+                    // Proceed with the automated sync sequence
                     this.runInitialSyncSequence();
-
             
                 } catch (error) {
                     this.log(`Connection failed: ${error.message}`, 'error');
+                    
+                    // Provide specific advice for common GATT disconnection errors
+                    if (error.message.includes('GATT Server is disconnected')) {
+                        this.log('Hint: The device rejected the connection. Ensure the official Sonicake mobile app is completely closed.', 'info');
+                    }
                 }
             }
 
