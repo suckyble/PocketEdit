@@ -12260,7 +12260,7 @@
                             this.ackPromiseResolve = null;
                             resolve(false); // Resolve with false on timeout
                         }
-                    }, 200); // 200ms timeout for an ACK
+                    }, 500); // 200ms timeout for an ACK
             
                     this.ackPromiseResolve = (success = true) => {
                         clearTimeout(timeout);
