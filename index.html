@@ -12167,7 +12167,7 @@
                     this.updateConnectionUI();
                     this.log('✅ Connected successfully!', 'received');
             
-                    // Proceed with the automated sync sequence
+                    // Proceed with the automated sync sequence [cite: 730, 734]
                     this.runInitialSyncSequence();
             
                 } catch (error) {
@@ -12260,7 +12260,7 @@
                             this.ackPromiseResolve = null;
                             resolve(false); // Resolve with false on timeout
                         }
-                    }, 500); // 200ms timeout for an ACK
+                    }, 500); // 500ms timeout for an ACK
             
                     this.ackPromiseResolve = (success = true) => {
                         clearTimeout(timeout);
@@ -12276,35 +12276,48 @@
                 const overlay = document.getElementById('lockingOverlay');
                 const overlayText = overlay.querySelector('p:first-child');
                 const overlaySubText = overlay.querySelector('p:last-child');
-
-                this.isInitialSyncing = true; // Set the flag to TRUE
-
+            
+                this.isInitialSyncing = true; // Set the flag to TRUE [cite: 730]
+            
                 try {
                     overlayText.textContent = 'Performing Initial Sync...';
                     overlaySubText.textContent = 'This will only take a moment.';
-                    overlay.style.display = 'flex';
-
+                    overlay.style.display = 'flex'; // [cite: 731]
+            
+                    // Pacing: We add small delays between major commands to prevent GATT collisions
                     overlayText.textContent = 'Syncing Clone Amps...';
-                    await this.syncCloneAmpNames(true);
-
+                    await this.syncCloneAmpNames(true); // [cite: 732, 878]
+                    await new Promise(r => setTimeout(r, 400)); 
+            
                     overlayText.textContent = 'Syncing User IRs...';
-                    await this.syncUserIRNames(true);
-
+                    await this.syncUserIRNames(true); // [cite: 733, 873]
+                    await new Promise(r => setTimeout(r, 400));
+            
                     overlayText.textContent = 'Syncing Global Settings...';
-                    await this.syncGlobalSettings(true);
+                    await this.syncGlobalSettings(true); // [cite: 733, 737]
+                    await new Promise(r => setTimeout(r, 400));
                     
                     overlayText.textContent = 'Syncing Preset Names & State...';
-                    await this.syncPresetNames(true);
+                    await this.syncPresetNames(true); // [cite: 734, 846]
                     
                 } catch (error) {
-                    this.log(`❌ Auto-sync sequence failed: ${error.message}`, 'error');
-                    alert(`Initial sync failed: ${error.message}. You may need to sync manually.`);
-                    // If it fails, we must still reset the flag and hide the overlay
-                    this.isInitialSyncing = false;
-                    overlay.style.display = 'none';
+                    this.log(`❌ Auto-sync sequence failed: ${error.message}`, 'error'); // [cite: 734]
+                    alert(`Initial sync failed: ${error.message}. You may need to sync manually.`); // [cite: 735]
+                } finally {
+                    // Fallback: If the sync doesn't trigger the automatic unlock through handleNotification,
+                    // we set a safety timeout to release the UI after the last command was sent.
+                    setTimeout(() => {
+                        if (this.isInitialSyncing) {
+                            this.log('Initial sync release triggered via fallback.', 'info');
+                            this.isInitialSyncing = false; // [cite: 736]
+                            overlay.style.display = 'none'; // [cite: 737, 832]
+                            // Reset overlay text for future save operations
+                            overlayText.textContent = 'Trying to save preset...'; // [cite: 834]
+                            overlaySubText.textContent = 'This could take up to 2 minutes!'; // [cite: 835]
+                        }
+                    }, 3000); 
                 }
             }
-
 
             syncGlobalSettings(isAutomated = false) {
                 return new Promise(async (resolve, reject) => {
@@ -12734,27 +12747,42 @@
                 this.isSyncing = false;
                 this.syncPresetNamesBtn.disabled = false;
                 this.syncPresetNamesBtn.textContent = 'Sync Preset Names';
-                this.log('All 20 name packets received. Processing...', 'info');
+                
+                // Safety check: if we got here via timeout, the log message should reflect reality
+                const packetCount = this.dumpPackets.length;
+                this.log(`Processing ${packetCount} name packets...`, 'info');
             
                 try {
                     const allNames = this.dumpPackets.flatMap(packet => this.parsePacketForNames(packet.slice(6, -2)));
+                    
                     if (allNames.length < 100) {
-                        // Even if we don't find all names, we can still proceed with what we have.
-                        this.log(`Warning: Found only ${allNames.length} names.`, 'error');
+                        this.log(`Warning: Found only ${allNames.length} names. Initial sync will proceed with partial data.`, 'error');
                     }
+                    
                     this.log(`✅ Successfully decoded ${allNames.length} preset names.`, 'info');
                     this.populatePatchLists(allNames);
             
-                    // This is the crucial change:
-                    // Instead of updating the UI immediately, we now ONLY ask for the current preset number.
-                    // The rest of the sync process will be triggered by the response to this command.
-                    this.log('Requesting currently selected preset number...', 'info');
-                    this.isWaitingForPresetNumber = true;
-                    this.writeCommand('8080F0000700010000000201020403F7');
+                    // PACING: Wait 300ms before requesting the preset number to avoid GATT collisions
+                    setTimeout(async () => {
+                        try {
+                            this.log('Requesting currently selected preset number...', 'info');
+                            this.isWaitingForPresetNumber = true;
+                            await this.writeCommand('8080F0000700010000000201020403F7');
+                        } catch (cmdError) {
+                            this.log(`Failed to request preset number: ${cmdError.message}`, 'error');
+                            this.isInitialSyncing = false;
+                            document.getElementById('lockingOverlay').style.display = 'none';
+                        }
+                    }, 300);
+            
                     if (this.presetNamesPromiseResolve) this.presetNamesPromiseResolve();
             
                 } catch (error) {
-                    this.log(`Error parsing preset names: ${error.message}`, 'error');
+                    this.log(`Error during name processing: ${error.message}`, 'error');
+                    // FAIL-SAFE: If processing crashes, release the UI so the app isn't bricked
+                    this.isInitialSyncing = false;
+                    document.getElementById('lockingOverlay').style.display = 'none';
+                    this.unlockPatchList();
                 }
             }
             
