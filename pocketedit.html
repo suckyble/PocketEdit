@@ -12929,7 +12929,7 @@
                     if (this.dumpPackets.length === 5 || this.connectionType === 'usb') {
 
                         // Work-around in case of USB MIDI, re-create the expected 5 (ble) packets ==========
-                        if (this.dumpPackets.length !== 5 || this.connectionType === 'usb') {
+                        if (this.connectionType === 'usb') {
                             this.dumpPackets = [];
                             const hdr = "8080F00706000100000000";
                             let p1 = hdr + hexString.slice(22,422) + "F7";
