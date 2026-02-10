@@ -12567,7 +12567,7 @@
                             this.ackPromiseResolve = null;
                             resolve(false); // Resolve with false on timeout
                         }
-                    }, 200); // 200ms timeout for an ACK
+                    }, 500); // Was 200ms timeout for an ACK, ~500ms is needed for saving preset via BLE
             
                     this.ackPromiseResolve = (success = true) => {
                         clearTimeout(timeout);
@@ -12793,7 +12793,32 @@
                 }
                 return encodedString;
             }
-            
+
+            // CRC-8/SMBUS: Packet Error Code (PEC)
+            // Polynomial: x^{8}+x^{2}+x^{1}+1 (Binary: 100000111, Hex: 0x07)
+            // Initial Value (Seed): 0x00
+            calculateSMBusPEC(hexString) {
+                // Convert hex string to byte array
+                const bytes = hexString.match(/[0-9a-fA-F]{2}/g).map(byte => parseInt(byte, 16));
+
+                let crc = 0; // Initial value for SMBus
+                const polynomial = 0x07; // SMBus polynomial: x^8 + x^2 + x^1 + 1
+
+                for (let byte of bytes) {
+                    crc ^= byte;
+                    for (let i = 0; i < 8; i++) {
+                        if (crc & 0x80) {
+                            crc = (crc << 1) ^ polynomial;
+                        } else {
+                            crc <<= 1;
+                        }
+                        // Ensure crc stays an 8-bit unsigned integer
+                        crc &= 0xFF;
+                    }
+                }
+                return crc.toString(16).toUpperCase().padStart(2, '0');
+            }
+
             async saveCurrentPreset() {
                 this.hideSaveModal();
                 this.lockingOverlay.style.display = 'flex';
@@ -12816,33 +12841,34 @@
                     }
             
                     const encodedNameHex = this.encodeNameForSave(presetName);
-                    const payloadTemplate = "0001000001000101040a{PRESET_BYTES}000000000000{ENCODED_NAME}000000000000000000000000";
+                    const payloadTemplate = "0001000001060101040a{PRESET_BYTES}000000000000{ENCODED_NAME}000000000000000000000000";
                     let finalPayload = payloadTemplate.replace('{ENCODED_NAME}', encodedNameHex);
                     finalPayload = finalPayload.replace('{PRESET_BYTES}', presetBytesHex);
-            
-                    for (let x = 0; x < 16; x++) {
-                        for (let y = 0; y < 16; y++) {
-                            const checksumX = x.toString(16);
-                            const checksumY = y.toString(16);
-                            const checksum = `0${checksumX}0${checksumY}`;
-                            const testCommand = `8080f0${checksum}${finalPayload}f7`;
-                            
-                            await this.writeCommand(testCommand);
-                            const wasSuccessful = await this.waitForAck();
-            
-                            if (wasSuccessful) {
-                                this.log(`✅ PRESET SAVED! Checksum: ${checksum.toUpperCase()}`, 'success');
-                                wasSaved = true;
-                                
-                                this.updateUIAfterSave(presetNumber, presetName);
-                                this.isPresetModified = false;
-                                this.updatePresetModifiedUI(false);
 
-                                x = 16; y = 16; // Break outer loops
-                            }
-                        }
+                    // Remove the extra 'zero nibble': "0001000001060101040a" -> "010010114a..."
+                    let inputHex = finalPayload.replace(/0(.)/g, '$1');
+
+                    // Calculate CRC
+                    const crc8 = this.calculateSMBusPEC(inputHex);
+
+                    // Expand the CRC with zeroes: 0xC5 -> "0C05"
+                    const expandedCRC = crc8.split('').map(nibble => '0' + nibble).join('');
+
+                    // Rebuild an expanded SysEx to be sent
+                    const outSysEx = "8080f0" + expandedCRC + finalPayload + "f7";
+
+                    await this.writeCommand(outSysEx);
+                    const wasSuccessful = await this.waitForAck();
+
+                    if (wasSuccessful) {
+                        this.log(`✅ PRESET SAVED! Checksum: ${crc8.toUpperCase()}`, 'success');
+                        wasSaved = true;
+
+                        this.updateUIAfterSave(presetNumber, presetName);
+                        this.isPresetModified = false;
+                        this.updatePresetModifiedUI(false);
                     }
-                    
+
                     if (!wasSaved) {
                         this.log('Save failed: No valid checksum found.', 'error');
                     }
