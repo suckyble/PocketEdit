@@ -12841,7 +12841,7 @@
                     }
             
                     const encodedNameHex = this.encodeNameForSave(presetName);
-                    const payloadTemplate = "0001000001060101040a{PRESET_BYTES}000000000000{ENCODED_NAME}000000000000000000000000";
+                    const payloadTemplate = "0001000001030101040a{PRESET_BYTES}000000000000{ENCODED_NAME}000000000000";
                     let finalPayload = payloadTemplate.replace('{ENCODED_NAME}', encodedNameHex);
                     finalPayload = finalPayload.replace('{PRESET_BYTES}', presetBytesHex);
 
