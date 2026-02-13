@@ -13,7 +13,7 @@ It was created as a fun side project using 99% AI programming logic and 100% har
 ## **Online accessing the App**
 
 You can now directly access PocketEdit online!
-The latest version is always available directly in your chrome based browser:
+The latest version is always available directly here:
 **[https://suckyble.github.io/PocketEdit/](https://suckyble.github.io/PocketEdit/)**
 
 ## **Features**
