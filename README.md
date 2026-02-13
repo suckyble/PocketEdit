@@ -1,6 +1,6 @@
 # **PocketEdit** 
 
-**PocketEdit** PocketEdit is a powerful, browser-based web application designed to give you deep, real-time control over your **Sonicake Pocket Master** multi-effects pedal. It provides a user-friendly graphical interface to manage presets, edit effects, and visualize your entire signal chain—all without needing to install any software, since it's written in HTML and JavaScript.
+**PocketEdit** is a powerful, browser-based web application designed to give you deep, real-time control over your **Sonicake Pocket Master** multi-effects pedal. It provides a user-friendly graphical interface to manage presets, edit effects, and visualize your entire signal chain—all without needing to install any software, since it's written in HTML and JavaScript.
 
 This single, portable HTML file unlocks the full potential of your device, making tone creation and management faster and more intuitive than ever before.
 It was created as a fun side project using 99% AI programming logic and 100% hard labour reverse engineering, learning about BLE/HCI snooping and understanding how this device works by looking at logs.
