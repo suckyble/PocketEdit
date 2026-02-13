@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pedal Batch Cracker v27</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #1a1a1a; color: #e0e0e0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .progress-section { margin: 20px 0; display: none; background: #252525; padding: 15px; border-radius: 8px; border: 1px solid #444; }
+        #statusHeader { font-size: 14px; color: #87cefa; margin-bottom: 5px; font-weight: bold; display: block; }
+        .progress-container { width: 100%; background-color: #111; border-radius: 10px; height: 10px; overflow: hidden; }
+        #progressBar { width: 0%; height: 100%; background-color: #00a300; transition: width 0.1s; }
+        #subStatus { font-size: 11px; color: #888; margin-top: 5px; font-family: monospace; text-align: right; display: block; }
+        textarea { width: 100%; height: 100px; background: #252525; color: #00ff00; border: 1px solid #444; padding: 10px; font-family: monospace; border-radius: 5px; width: -webkit-fill-available; }
+        #log { height: 200px; background: #000; border: 1px solid #333; overflow-y: scroll; padding: 10px; font-family: monospace; font-size: 11px; border-radius: 5px; margin-bottom: 10px; white-space: pre-wrap; }
+        .controls { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 15px 0; }
+        button { padding: 12px; font-weight: bold; cursor: pointer; border-radius: 5px; border: none; background: #333; color: white; transition: 0.2s; font-size: 12px; }
+        #connectBtn { background: #2b5797; }
+        #connectBtn:disabled { background: #2d3e50; color: #666; cursor: default; opacity: 0.6; }
+        #startBtn { background: #00a300; }
+        #abortBtn { background: #c0392b; display: none; }
+        #clearBtn { background: #555; }
+        .manual-section { background: #252525; padding: 15px; border-radius: 8px; margin: 20px 0; border: 1px solid #444; }
+        .manual-input-row { display: flex; gap: 10px; margin-top: 10px; }
+        .manual-input-row input { flex-grow: 1; background: #000; border: 1px solid #555; color: #00ff00; padding: 10px; font-family: monospace; border-radius: 4px; }
+        #manualTestBtn { background: #8e44ad; min-width: 140px; }
+        .results-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .box { padding: 15px; border-radius: 5px; border: 1px solid #444; min-height: 250px; }
+        .success-box { background: #1e3a1e; border-color: #2d5a2d; }
+        .candidate-box { background: #2a2a2d; border-color: #444; }
+        .item { border-bottom: 1px solid #333; padding: 10px 0; font-family: monospace; font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .valid { color: #00ff00; font-weight: bold; }
+        .verify-btn { background: #8e44ad; padding: 5px 10px; font-size: 10px; border-radius: 3px; border: none; color: white; cursor: pointer; }
+        .tag-ok { background: #00a300; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pedal Cracker v27</h1>
+        <textarea id="payloadInput" placeholder="Paste logs here (Batch Mode)..."></textarea>
+        <div class="controls">
+            <button id="connectBtn">1. Connect</button>
+            <button id="startBtn" disabled>2. Start Batch</button>
+            <button id="abortBtn">Abort</button>
+            <button id="downloadBtn">3. Download</button>
+            <button id="clearBtn">Clear All</button>
+        </div>
+        <div class="progress-section" id="pSection">
+            <span id="statusHeader">Ready...</span>
+            <div class="progress-container"><div id="progressBar"></div></div>
+            <span id="subStatus">Idle</span>
+        </div>
+        <div id="log"></div>
+
+        <div class="manual-section">
+            <h3 style="margin:0">Manual Single-Command Test</h3>
+            <div class="manual-input-row">
+                <input type="text" id="manualInput" placeholder="Paste full 20-byte command to verify...">
+                <button id="manualTestBtn" disabled>Verify Code</button>
+            </div>
+        </div>
+
+        <div class="results-container">
+            <div class="box success-box">
+                <h3 style="margin:0">Verified Results (<span id="successCount">0</span>)</h3>
+                <div id="successList"></div>
+            </div>
+            <div class="box candidate-box">
+                <h3 style="margin:0">Pending Verification (<span id="candidateCount">0</span>)</h3>
+                <div id="candidateList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SERVICE_UUID = '03b80e5a-ede8-4b33-a751-6ce34ec4c700';
+        const CHARACTERISTIC_UUID = '7772e5db-3868-4112-a1a9-f2669d106bf3';
+        const SUCCESS_ACK_PREFIX = "8080f00b02"; 
+        const ERROR_NACK = "8080f00b05000100000003010400080001f7";
+
+        let device, characteristic, ackResolver;
+        let lastCommand = "NONE", secondLastCommand = "NONE";
+        let sessionResults = [], isAborting = false;
+
+        const yieldToMain = () => new Promise(resolve => setTimeout(resolve, 10));
+
+        function log(msg, color = "#e0e0e0") {
+            const span = document.createElement('div');
+            span.style.color = color;
+            span.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            const logEl = document.getElementById('log');
+            logEl.appendChild(span);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        document.getElementById('connectBtn').onclick = async () => {
+            try {
+                device = await navigator.bluetooth.requestDevice({ filters: [{ services: [SERVICE_UUID] }] });
+                const server = await device.gatt.connect();
+                const service = await server.getPrimaryService(SERVICE_UUID);
+                characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
+                await characteristic.startNotifications();
+                characteristic.addEventListener('characteristicvaluechanged', (e) => {
+                    const hex = Array.from(new Uint8Array(e.target.value.buffer)).map(b => b.toString(16).padStart(2, '0')).join('').toLowerCase();
+                    if (ackResolver) {
+                        const elapsed = Date.now() - ackResolver.startTime;
+                        ackResolver.resolve({ hex, elapsed });
+                    }
+                });
+                document.getElementById('connectBtn').disabled = true;
+                document.getElementById('connectBtn').textContent = "Connected";
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('manualTestBtn').disabled = false;
+                log("Connected.", "#00ff00");
+            } catch (err) { log("Error: " + err.message, "#ff4444"); }
+        };
+
+        document.getElementById('abortBtn').onclick = () => {
+            isAborting = true;
+            log("🛑 Abort clicked: Breaking Search and jumping to Verification...", "#ff9900");
+        };
+
+        async function writeCommand(cmd) {
+            secondLastCommand = lastCommand; lastCommand = cmd;
+            const bytes = new Uint8Array(cmd.replace(/\s/g, '').match(/.{1,2}/g).map(b => parseInt(b, 16)));
+            await characteristic.writeValueWithoutResponse(bytes);
+        }
+
+        function waitForResponse(timeout = 300) {
+            const startTime = Date.now();
+            return new Promise(res => {
+                ackResolver = { resolve: res, startTime: startTime };
+                setTimeout(() => { if (ackResolver && ackResolver.startTime === startTime) res({ hex: "TIMEOUT", elapsed: timeout }); }, timeout);
+            });
+        }
+
+        function getResponseStatus(hex) {
+            if (hex === "TIMEOUT") return "TIMEOUT";
+            if (hex.startsWith(SUCCESS_ACK_PREFIX)) return "SUCCESS";
+            if (hex === ERROR_NACK.toLowerCase()) return "ERROR_NACK";
+            return "UNKNOWN_NOTIF";
+        }
+
+        window.manualVerify = async (id) => {
+            const item = sessionResults.find(r => r.id === id);
+            log(`Checking Candidate: ${item.cmd.substring(6,10)}...`, "#8e44ad");
+            await writeCommand(item.cmd);
+            const response = await waitForResponse(800);
+            const status = getResponseStatus(response.hex);
+            if (status === "SUCCESS" || status === "UNKNOWN_NOTIF") {
+                item.verified = true; log("Verified!", "#00ff00");
+            } else {
+                log(`Failed. Testing backup...`, "#ff9900");
+                await writeCommand(item.backup);
+                const respB = await waitForResponse(800);
+                if (getResponseStatus(respB.hex) !== "ERROR_NACK" && respB.hex !== "TIMEOUT") {
+                    item.cmd = item.backup; item.verified = true; log("Backup Verified!", "#00ff00");
+                } else { log("Verify failed.", "#ff4444"); }
+            }
+            updateUI();
+        };
+
+        function updateUI() {
+            const successList = document.getElementById('successList');
+            const candidateList = document.getElementById('candidateList');
+            successList.innerHTML = ""; candidateList.innerHTML = "";
+            sessionResults.forEach(r => {
+                const div = document.createElement('div'); div.className = 'item';
+                if (r.verified) {
+                    div.innerHTML = `<span class="valid">${r.cmd} <span class="tag-ok">[OK]</span></span>`;
+                    successList.appendChild(div);
+                } else {
+                    div.innerHTML = `<span>${r.cmd.substring(6,10)}...</span><button class="verify-btn" onclick="manualVerify(${r.id})">Verify</button>`;
+                    candidateList.appendChild(div);
+                }
+            });
+            document.getElementById('successCount').textContent = sessionResults.filter(r => r.verified).length;
+            document.getElementById('candidateCount').textContent = sessionResults.filter(r => !r.verified).length;
+        }
+
+        document.getElementById('manualTestBtn').onclick = async () => {
+            let cmd = document.getElementById('manualInput').value.trim().replace(/\s/g, '');
+            if (!cmd) return;
+            if (cmd.includes('010204')) cmd = cmd.replace('010204', '010104');
+            log(`Manual Test: ${cmd}`, "#8e44ad");
+            await writeCommand(cmd);
+            const res = await waitForResponse(800);
+            const status = getResponseStatus(res.hex);
+            log(`Result: ${status}`, (status === "SUCCESS" || status === "UNKNOWN_NOTIF") ? "#00ff00" : "#ff4444");
+        };
+
+        document.getElementById('startBtn').onclick = async () => {
+            const rawLines = document.getElementById('payloadInput').value.trim().split(/\n/);
+            const payloads = rawLines.map(line => {
+                let clean = line.replace(/\s/g, '');
+                if (clean.includes('010204')) clean = clean.replace('010204', '010104');
+                if (clean.toLowerCase().startsWith('8080f0') && clean.toLowerCase().endsWith('f7')) clean = clean.slice(10, -2);
+                return clean;
+            }).filter(p => p.length > 0);
+
+            isAborting = false;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('abortBtn').style.display = "block";
+            document.getElementById('pSection').style.display = "block";
+
+            // PHASE 1: SEARCH
+            for (let i = 0; i < payloads.length; i++) {
+                if (isAborting) break;
+                const p = payloads[i];
+                
+                // CRITICAL FIX: SMART RESUME
+                if (sessionResults.some(r => r.payload === p && r.verified)) {
+                    log(`⏭️ Skipping payload ${i+1}: Already verified in list.`, "#aaa");
+                    continue;
+                }
+
+                log(`SEARCH: Payload ${i+1}/${payloads.length}`, "#87cefa");
+                for (let x = 0; x < 256; x++) {
+                    if (isAborting) break;
+                    await yieldToMain();
+                    document.getElementById('progressBar').style.width = ((x+1)/256)*100 + "%";
+                    document.getElementById('subStatus').textContent = `Trial: ${x}/256`;
+                    const ck = `0${Math.floor(x/16).toString(16)}0${(x%16).toString(16)}`;
+                    const cmd = `8080f0${ck}${p}f7`;
+                    ackResolver = null;
+                    await writeCommand(cmd);
+                    const resp = await waitForResponse(220);
+                    if (getResponseStatus(resp.hex) === "SUCCESS" || getResponseStatus(resp.hex) === "UNKNOWN_NOTIF") {
+                        log(`MATCH: Found ${ck}.`, "#00ff00");
+                        sessionResults.push({ id: Date.now() + x, payload: p, cmd, backup: secondLastCommand, verified: false });
+                        break;
+                    } 
+                    await new Promise(r => setTimeout(r, 40));
+                }
+            }
+
+            // PHASE 2: AUTO-VERIFY (Always runs for unverified candidates)
+            const toVerify = sessionResults.filter(r => !r.verified);
+            if (toVerify.length > 0) {
+                log(`AUTO-VERIFY: Starting pass for ${toVerify.length} candidates...`, "#ffff00");
+                document.getElementById('progressBar').style.backgroundColor = "#ffff00";
+                for (let i = 0; i < sessionResults.length; i++) {
+                    const r = sessionResults[i];
+                    if (r.verified) continue;
+                    
+                    document.getElementById('subStatus').textContent = `Verifying: ${i+1}/${sessionResults.length}`;
+                    await writeCommand(r.cmd);
+                    const resp = await waitForResponse(400);
+                    if (getResponseStatus(resp.hex) === "SUCCESS" || getResponseStatus(resp.hex) === "UNKNOWN_NOTIF") {
+                        r.verified = true;
+                        log(`OK: ${r.cmd.substring(6,10)} confirmed.`, "#00ff00");
+                    } else {
+                        log(`FAIL: ${r.cmd.substring(6,10)} did not ACK.`, "#ff4444");
+                    }
+                    await new Promise(r => setTimeout(r, 100));
+                }
+            }
+
+            updateUI();
+            document.getElementById('statusHeader').textContent = isAborting ? "Aborted (Checked Candidates)" : "Finished.";
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('abortBtn').style.display = "none";
+            document.getElementById('progressBar').style.backgroundColor = "#00a300";
+        };
+
+        document.getElementById('downloadBtn').onclick = () => {
+            const list = sessionResults.filter(r => r.verified).map(r => r.cmd).join('\n');
+            const blob = new Blob([list], {type: 'text/plain'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `verified_commands.txt`;
+            a.click();
+        };
+
+        document.getElementById('clearBtn').onclick = () => { 
+            if(confirm("Wipe everything?")) { sessionResults = []; document.getElementById('log').innerHTML = ""; updateUI(); } 
+        };
+    </script>
+</body>
+</html>
