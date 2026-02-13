@@ -22,7 +22,6 @@ The latest version is always available directly here:
 * **Expanded Compatibility:** USB MIDI support allows the editor to work in **Firefox** and other non-Chromium browsers.
 * **Instant Preset Saving:** Brute-forcing the CRC is gone! Saving now uses a precise **CRC-8 calculation** for instant, reliable preset writing.
 * **Real-Time Editing:** Tweak any parameter and hear the changes instantly on your device.
-* **Real-Time Editing:** Tweak any parameter and hear the changes instantly on your device. 
 * **Full Preset Management:** Easily browse, search, and load all 50 User and 50 Factory presets.  
 * **Visual Signal Chain:** See your entire effects chain at a glance. Simply click a module to edit its parameters.  
 * **Automatic Sync:** Upon connecting, the app automatically syncs all preset names, effect types, user-loaded IRs, and global settings from your device, ensuring the editor always matches your hardware.  
