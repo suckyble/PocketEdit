@@ -9884,7 +9884,7 @@
                 this.isBruteForcing = false;
                 this.isWaitingForPresetDump = false;
                 this.dumpPackets = [];
-                this.syncDelayMs = 2; // Delay between sync commands to avoid overwhelming device
+                this.syncDelayMs = 10; // Delay between sync commands to avoid overwhelming device
                 this.ackPromiseResolve = null;
                 this.isSyncingState = false;
                 this.syncTimeoutId = null;
@@ -13063,6 +13063,9 @@
                     if (fullPresetData.selectedEffects) {
                         for (const [moduleIdStr, fxId] of Object.entries(fullPresetData.selectedEffects)) {
                             const moduleId = parseInt(moduleIdStr);
+
+                            // NR (module 0) has only one effect and no type-switch command — skip it
+                            if (moduleId === 0) continue;
 
                             // Determine correct lookup ID for command (clone mode rerouting)
                             let lookupModuleId = moduleId;
