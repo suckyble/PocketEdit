@@ -133,7 +133,7 @@
             background: #2a2a2a;
             border-bottom-color: #ff6b35;
         }
-        
+
         .patch-search-container {
             padding: 8px;
             background: #2a2a2a;
@@ -180,7 +180,7 @@
             background: linear-gradient(145deg, #0066cc, #0052a3);
             border-color: #0088ff;
         }
-        
+
         /* Main Content Area */
         .main-content {
             flex: 1;
@@ -342,7 +342,7 @@
             flex: 1;
             overflow-y: auto;
         }
-        
+
         .effect-description {
             font-size: 12px;
             color: #aaa;
@@ -605,7 +605,7 @@
             width: 100%;
             font-family: 'Courier New', Courier, monospace;
         }
-        
+
         #sendManualCommandBtn {
             width: auto;
             margin-bottom: 0;
@@ -629,7 +629,7 @@
             text-transform: uppercase;
             min-width: fit-content;
         }
-        
+
         /* New container for the patch volume slider */
         .patch-volume-container {
             display: flex;
@@ -695,7 +695,7 @@
         .advanced-settings-panel.visible {
             display: block; /* Shown when this class is added */
         }
-        
+
         .advanced-settings-panel h4 {
             color: #ff6b35;
             font-size: 12px;
@@ -737,7 +737,7 @@
             padding-top: 20px;
             border-top: 1px solid #555;
         }
-        
+
         /* Grid layout for the main components */
         .tap-grid {
             display: grid;
@@ -745,7 +745,7 @@
             gap: 15px;
             align-items: center;
         }
-        
+
         /* Styling for the BPM and Delay Time display boxes */
         .tap-display {
             background-color: #222;
@@ -753,7 +753,7 @@
             padding: 10px;
             border: 1px solid #444;
         }
-        
+
         /* BPM and Delay Time text input styling */
         .bpm-input {
             width: 100%;
@@ -767,25 +767,25 @@
             text-align: center;
             padding: 0;
         }
-        
+
         /* Removes the number input arrows in Chrome/Safari */
         .bpm-input::-webkit-outer-spin-button,
         .bpm-input::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
-        
+
         /* Removes the number input arrows in Firefox */
         .bpm-input[type=number] {
             -moz-appearance: textfield;
         }
-        
+
         /* Subtle background highlight when the BPM input is focused */
         .bpm-input:focus {
             outline: none;
             background-color: rgba(247, 147, 30, 0.1);
         }
-        
+
         /* "BPM" and "Delay Time" labels under the displays */
         .display-label {
             font-size: 0.7em;
@@ -794,7 +794,7 @@
             display: block;
             margin-top: 2px;
         }
-        
+
         /* Main "TAP" button styling */
         .tap-button {
             grid-column: 1 / -1;
@@ -809,20 +809,20 @@
             cursor: pointer;
             transition: background-color 0.1s ease-out, box-shadow 0.1s ease-out, color 0.1s ease-out;
         }
-        
+
         /* "TAP" button active (pressed) state */
         .tap-button:active {
             /* Updated to the primary slider color */
             background-color: #ff6b35;
             transform: scale(0.98);
         }
-        
+
         /* Visual indicator for the BPM beat */
        .tap-button.beat-flash {
             /* The text will flash to the active orange color */
             color: #ff6b35;
         }
-        
+
         /* Container for the note division buttons (1/4, 1/8, etc.) */
         .note-divisions {
             grid-column: 1 / -1;
@@ -830,7 +830,7 @@
             justify-content: space-between;
             gap: 8px;
         }
-        
+
         /* Individual note division button styling */
         .note-btn {
             flex-grow: 1;
@@ -843,7 +843,7 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        
+
         /* Active note division button styling */
         .note-btn.active {
             /* Updated to the primary slider color */
@@ -858,14 +858,14 @@
             /* This animation will run when the class is active */
             animation: flash-red 0.8s infinite;
         }
-        
+
         /* This defines the flashing animation itself */
         @keyframes flash-red {
             0% { background-color: transparent; }
             50% { background-color: #9d2c2c; } /* A dark red flash */
             100% { background-color: transparent; }
         }
-        
+
         #delay-time-ms-7 {
             font-size: 1.2em;
             color: #ccc;
@@ -924,7 +924,7 @@
             <div class="sidebar-header">
                 POCKET EDIT
             </div>
-            
+
             <div class="connection-panel">
                 <div class="connection-status">
                     <div id="statusDot" class="status-dot"></div>
@@ -933,7 +933,7 @@
                 <button id="connectBtn" class="btn btn-primary">Connect</button>
                 <button id="disconnectBtn" class="btn" disabled>Disconnect</button>
             </div>
-            
+
             <div class="patch-list">
                  <div class="patch-tabs">
                     <button id="factoryTabBtn" class="patch-tab-btn">Factory</button>
@@ -1310,6 +1310,9 @@
         </div>
     </div>
     <button id="savePresetBtn" class="btn" style="margin-top: 20px;">Save Current Preset</button>
+    <button id="exportPresetBtn" class="btn" style="margin-top: 10px;">Export Preset</button>
+    <button id="importPresetBtn" class="btn" style="margin-top: 10px;">Import Preset</button>
+    <input type="file" id="presetFileInput" accept=".json" style="display: none;">
 </div>
     <div class="log-toggle" id="logToggle">Show Log</div>
     <div class="log-panel" id="logPanel">
@@ -2458,7 +2461,7 @@
       "810": "8080f00f0800010000000e0101040700080000000000000008000000000000010500000000000cf7"
     }
   },
-  
+
   "parameters": {
     "0": {
       "0":{
@@ -9867,7 +9870,7 @@
             '0': 'NR',  '1': 'FX1', '2': 'DRV', '3': 'AMP',
             '4': 'IR',  '5': 'EQ',  '6': 'FX2', '7': 'DLY', '8': 'RVB'
         };
-        
+
         class SonicakeBLEEditor {
             constructor() {
                 this.device = null;
@@ -9881,6 +9884,7 @@
                 this.isBruteForcing = false;
                 this.isWaitingForPresetDump = false;
                 this.dumpPackets = [];
+                this.syncDelayMs = 10; // Delay between sync commands to avoid overwhelming device
                 this.ackPromiseResolve = null;
                 this.isSyncingState = false;
                 this.syncTimeoutId = null;
@@ -9917,7 +9921,7 @@
   <line x1="30" y1="100" x2="90" y2="30" stroke="red" stroke-width="5"/>
 </svg>
 `;
-                
+
                 this.ampModeFxId3 = undefined; // Stores the last selected FX ID when in Factory Mode
                 this.ampModeFxId9 = undefined; // Stores the last selected FX ID when in Clone Mode
 
@@ -9926,7 +9930,7 @@
                 this.activePatchTab = 'user';
                 this.userPatchesData = [];
                 this.factoryPatchesData = [];
-                
+
                 this.currentFilteredPatches = [];
                 this.isLoadingMorePatches = false;
                 this.patchesPerRender = 15;
@@ -11080,23 +11084,23 @@
                 '0C0007090404': 999,
                 '0000070A0404': 1000,
                 };
-                
+
                 this.ALGID_LOCATION_MAP = {
                     '0_0': { p: 1, o: 101 },  // NR THRE
-                
+
                     '1_0': { p: 1, o: 165 },  // FX1 algId 0
                     '1_1': { p: 1, o: 173 },  // FX1 algId 1
                     '1_2': { p: 1, o: 181 },  // FX1 algId 2
                     '1_3': { p: 1, o: 189 },  // FX1 algId 3
                     '1_4': { p: 1, o: 197 },  // FX1 algId 4
                     '1_5': { p: 1, o: 205 },  // FX1 algId 5
-                
+
                     '2_0': { p: 2, o: 29 },   // DRV algId 0
                     '2_1': { p: 2, o: 37 },   // DRV algId 1
                     '2_2': { p: 2, o: 45 },   // DRV algId 2
                     '2_3': { p: 2, o: 53 },   // DRV algId 3
                     '2_4': { p: 2, o: 61 },   // DRV algId 4
-                
+
                     '3_0': { p: 2, o: 93 },   // AMP algId 0
                     '3_1': { p: 2, o: 101 },  // AMP algId 1
                     '3_2': { p: 2, o: 109 },  // AMP algId 2
@@ -11104,9 +11108,9 @@
                     '3_4': { p: 2, o: 125 },  // AMP algId 4
                     '3_5': { p: 2, o: 133 },  // AMP algId 5
                     '3_6': { p: 2, o: 141 },  // AMP algId 6
-                
+
                     '4_0': { p: 2, o: 157 },  // IR algId 0
-                
+
                     '5_0': { p: 3, o: 21 },   // EQ algId 0
                     '5_1': { p: 3, o: 29 },   // EQ algId 1
                     '5_2': { p: 3, o: 37 },   // EQ algId 2
@@ -11119,26 +11123,26 @@
                     '6_2': { p: 3, o: 101 },  // FX2 algId 2
                     '6_3': { p: 3, o: 109 },  // FX2 algId 3
                     '6_4': { p: 3, o: 117 },  // FX2 algId 4
-                
+
                     '7_0': { p: 3, o: 149 },  // DLY algId 0
                     '7_1': { p: 3, o: 157 },  // DLY algId 1
                     '7_2': { p: 3, o: 165 },  // DLY algId 2
                     '7_3': { p: 3, o: 173 },  // DLY algId 3
                     '7_4': { p: 3, o: 181 },  // DLY algId 4
-                
+
                     '8_0': { p: 4, o: 13 },   // RVB algId 0
                     '8_1': { p: 4, o: 21 },   // RVB algId 1 (Spring Decay)
                     '8_2': { p: 4, o: 29 },   // RVB algId 2 (Decay)
                     '8_4': { p: 4, o: 45 },   // RVB algId 4 (Damp)
                     '8_5': { p: 4, o: 53 },   // RVB algId 5 (Mod)
-                
+
                     '9_0': { p: 4, o: 77 },  // CLONE algId 0
                     '9_1': { p: 4, o: 85 },  // CLONE algId 1
                     '9_2': { p: 4, o: 93 },  // CLONE algId 2
                     '9_3': { p: 4, o: 101 },  // CLONE algId 3
                     '9_4': { p: 4, o: 109 }   // CLONE algId 4
                 };
-                
+
                 // This object stores signature-to-NAME mappings, from the scanner tool.
                 // It will be converted to a signature-to-ID map dynamically after files are loaded.
                 this.EFFECT_SIGNATURE_TO_NAME_MAP = {
@@ -11201,7 +11205,7 @@
                     }
                 };
                 this.signatureToFxIdMaps = {}; // Will be populated dynamically
-                
+
                 this.initialize();
             }
 
@@ -11219,24 +11223,24 @@
                 this.log('Loading hardcoded libraries...', 'info');
                     this.definitions = MODULE_LIBRARY_DATA;
                     this.commands = COMMAND_LIBRARY_DATA;
-    
+
                     if (!this.definitions || !this.commands) {
                         this.log('❌ Error: Hardcoded library data is missing.', 'error');
                         alert('Error: Library data is missing. Check the script tag.');
                         return;
                     }
-    
+
                     this.log('✅ Libraries loaded successfully.', 'info');
-    
+
                     this.buildFxIdMaps();
                     this.populatePatchLists();
                     this.populateUIFromDefinitions();
                     this.setupControlListeners();
                     this.setupAmpCloneMode();
                     this.setupDragAndDrop();
-    
+
                     document.getElementById('editor-container').style.display = 'flex';
-    
+
                 const firstUserPatch = document.querySelector('#patchListContainer .patch-item');
                 if (firstUserPatch) {
                     const baseName = firstUserPatch.dataset.baseName;
@@ -11256,27 +11260,27 @@
                     this.log('Attempting to load library files...', 'info');
                     const moduleFileInput = document.getElementById('moduleFile');
                     const commandFileInput = document.getElementById('commandFile');
-                
+
                     try {
                         const [definitionsContent, commandsContent] = await Promise.all([
                             this.loadFileContent(moduleFileInput.files[0]),
                             this.loadFileContent(commandFileInput.files[0])
                         ]);
-                
+
                         this.definitions = definitionsContent;
                         this.commands = commandsContent;
                         this.log('✅ Libraries loaded successfully from files.', 'info');
-                
+
                         this.buildFxIdMaps();
                         this.populatePatchLists();
                         this.populateUIFromDefinitions();
                         this.setupControlListeners();
                         this.setupAmpCloneMode();
                         this.setupDragAndDrop();
-                        
+
                         document.getElementById('file-loader-container').style.display = 'none';
                         document.getElementById('editor-container').style.display = 'flex';
-                
+
                         // THE CODE BLOCK THAT CAUSED THE ISSUE HAS BEEN REMOVED FROM HERE.
                         // We will now perform the initial UI setup without syncing.
                         const firstUserPatch = document.querySelector('#patchListContainer .patch-item');
@@ -11293,7 +11297,7 @@
                         document.querySelectorAll('.slider').forEach(slider => {
                             this.updateSliderProgress(slider);
                         });
-                
+
                     } catch (error) {
                         this.log(`❌ Error loading files: ${error.message}`, 'error');
                         alert(`Error loading files: ${error.message}`);
@@ -11310,7 +11314,7 @@
                 for (const moduleId in this.EFFECT_SIGNATURE_TO_NAME_MAP) {
                     this.signatureToFxIdMaps[moduleId] = {};
                     const moduleMap = this.EFFECT_SIGNATURE_TO_NAME_MAP[moduleId];
-                    
+
                     for (const signature in moduleMap.signatures) {
                         const fxName = moduleMap.signatures[signature];
                         const fxId = nameToFxId[fxName];
@@ -11363,22 +11367,22 @@
                 document.addEventListener('keydown', (e) => {
                      // Get the currently focused element on the page.
                      const activeEl = document.activeElement;
-            
+
                      // Check if the space bar was pressed AND if the user is NOT currently typing
                      // inside an <input> element. This prevents the tap tempo from firing
                      // when the user is searching for patches or entering a manual command.
                      if (e.code === 'Space' && activeEl.tagName !== 'INPUT') {
                          // Prevent the default browser action for the space bar (e.g., scrolling the page).
                          e.preventDefault(); 
-                 
+
                          const tapButton = document.getElementById('tap-button-7');
                          if (tapButton) {
                              // Add a class for a brief visual flash to give user feedback.
                              tapButton.classList.add('beat-flash');
-                             
+
                              // Programmatically trigger the button's click event.
                              tapButton.click(); 
-                             
+
                              // Remove the flash class after a short delay.
                              setTimeout(() => tapButton.classList.remove('beat-flash'), 100);
                          }
@@ -11392,16 +11396,16 @@
                 const min = sliderElement.hasAttribute('min') ? parseFloat(sliderElement.min) : 0;
                 const max = sliderElement.hasAttribute('max') ? parseFloat(sliderElement.max) : 100;
                 const value = parseFloat(sliderElement.value);
-                
+
                 const progressColor = '#ff6b35';
                 const trackColor = '#444';
                 const totalRange = max - min;
-            
+
                 // Case 1: Logic for true bipolar sliders (e.g., -12 to +12)
                 if (min < 0 && max > 0) {
                     const zeroPointPercent = (-min / totalRange) * 100;
                     const valuePercent = ((value - min) / totalRange) * 100;
-            
+
                     let gradient;
                     if (value >= 0) {
                         gradient = `linear-gradient(to right, ${trackColor} ${zeroPointPercent}%, ${progressColor} ${zeroPointPercent}%, ${progressColor} ${valuePercent}%, ${trackColor} ${valuePercent}%)`;
@@ -11409,21 +11413,21 @@
                         gradient = `linear-gradient(to right, ${trackColor} ${valuePercent}%, ${progressColor} ${valuePercent}%, ${progressColor} ${zeroPointPercent}%, ${trackColor} ${zeroPointPercent}%)`;
                     }
                     sliderElement.style.background = gradient;
-                    
+
                 // Case 2: Logic for all other linear sliders (e.g., 0-100 and -24 to 0)
                 } else {
                     const progressPercent = totalRange === 0 ? 0 : ((value - min) / totalRange) * 100;
                     sliderElement.style.background = `linear-gradient(to right, ${progressColor} ${progressPercent}%, ${trackColor} ${progressPercent}%)`;
                 }
             }
-        
+
             populatePatchLists(decodedNames = null) {
                 this.userPatchesData = [];
                 this.factoryPatchesData = [];
 
                 const userPresets = this.commands.presetCommands.user || {};
                 const factoryPresets = this.commands.presetCommands.factory || {};
-                
+
                 const userNames = decodedNames ? decodedNames.slice(0, 50) : [];
                 const factoryNames = decodedNames ? decodedNames.slice(50, 100) : [];
 
@@ -11456,16 +11460,16 @@
                 const sourceData = this.activePatchTab === 'factory' ? this.factoryPatchesData : this.userPatchesData;
 
                 const filteredData = sourceData.filter(patch => patch.displayText.toLowerCase().includes(searchTerm));
-                
+
                 filteredData.forEach(patchData => {
                     this.createPatchItem(patchData);
                 });
             }
-            
+
             createPatchItem(patchData) {
                 const item = document.createElement('div');
                 item.className = 'patch-item';
-                
+
                 item.textContent = patchData.displayText;
                 item.title = patchData.displayText;
                 item.dataset.code = patchData.command;
@@ -11502,7 +11506,7 @@
                 if (newPatchBaseName !== currentPatchBaseName) {
                     // This is a generic "request status" command. The device knows which preset is active.
                     const requestStatusCommand = '8080F0010500010000000201020405F7';
-                    
+
                     this.log('Requesting preset modification status...', 'info');
                     await this.writeCommand(requestStatusCommand);
 
@@ -11526,7 +11530,7 @@
                     this.log('ACK received. Proceeding with sync.', 'info');
                     this.syncCurrentPresetState(); 
                 }
-                
+
                 // Reset modified state for the new preset
                 this.isPresetModified = false;
                 this.updatePresetModifiedUI(false);
@@ -11534,14 +11538,14 @@
                 const allPatchItems = document.querySelectorAll('.patch-item');
                 allPatchItems.forEach(el => el.classList.remove('selected'));
                 element.classList.add('selected');
-            
+
                 const baseName = element.dataset.baseName;
                 const displayText = element.textContent;
                 const displayName = displayText.includes(': ') ? displayText.split(': ')[1] : 'Preset';
-            
+
                 document.getElementById('patchNumber').textContent = baseName;
                 document.getElementById('patchName').textContent = displayName;
-                
+
                 if (!sendCommand) {
                      this.syncCurrentPresetState();
                 } else {
@@ -11565,7 +11569,7 @@
                     if (controlPanel) {
                         controlPanel.querySelector('.module-title').textContent = moduleDef.name;
                     }
-                    
+
                     if (moduleId === 3) return;
 
                     const typeSelect = document.getElementById(`module-type-${moduleId}`);
@@ -11592,21 +11596,21 @@
                 const cloneModeToggle = document.getElementById('amp-clone-mode');
                 const ampTypeSelect = document.getElementById('module-type-3');
                 const irModuleElement = document.querySelector('[data-module-id="4"]');
-            
+
                 if (!cloneModeToggle || !ampTypeSelect || !this.definitions) return;
-            
+
                 // --- 1. Initialize Storage Properties (Add these to your constructor if not present) ---
                 if (this.ampModeFxId3 === undefined) this.ampModeFxId3 = parseInt(ampTypeSelect.value, 10);
                 if (this.ampModeFxId9 === undefined) this.ampModeFxId9 = this.definitions.modules.find(m => m.moduleId === 9).effects[0];
-            
-            
+
+
                 const populate = (moduleId, lastSelectedFxId) => {
                     const moduleDef = this.definitions.modules.find(m => m.moduleId === moduleId);
                     if (!moduleDef) return;
-            
+
                     ampTypeSelect.innerHTML = '';
                     let initialFxId = moduleDef.effects[0]; // Default to first effect in the list
-            
+
                     moduleDef.effects.forEach(fxId => {
                         const effect = this.definitions.effectLibrary[fxId];
                         if (effect) {
@@ -11614,74 +11618,74 @@
                             option.value = fxId;
                             option.textContent = effect.name;
                             ampTypeSelect.appendChild(option);
-            
+
                             // If this is the last selected ID, set it as the initial selection
                             if (fxId === lastSelectedFxId) {
                                 initialFxId = fxId;
                             }
                         }
                     });
-            
+
                     // Set the dropdown's value to the stored or default FX ID
                     ampTypeSelect.value = initialFxId;
                     return initialFxId;
                 };
-            
+
                 // Helper function to force control update using the current mode's ID.
                 const forceControlUpdate = (currentModuleId, selectedFxId) => {
                     // This targets the controls for the Amp module's UI slot (ID 3) 
                     // but passes the correct logical module ID (3 or 9) to rebuild the parameters.
                     this.createParameterControls(3, selectedFxId); 
                 };
-            
+
                 // 2. Initial Setup (Load Factory Amp state)
                 const initialFxId = populate(3, this.ampModeFxId3);
                 forceControlUpdate(3, initialFxId); 
-            
+
                 cloneModeToggle.addEventListener('click', () => {
                     const isTurningOnCloneMode = !cloneModeToggle.classList.contains('on');
                     this.updateIRModuleForCloneMode(isTurningOnCloneMode);
-                    
+
                     // --- STEP A: SAVE CURRENT STATE ---
                     const lastModuleId = isTurningOnCloneMode ? 3 : 9;
                     const currentFxId = parseInt(ampTypeSelect.value, 10);
-            
+
                     if (lastModuleId === 3) {
                         this.ampModeFxId3 = currentFxId;
                     } else {
                         this.ampModeFxId9 = currentFxId;
                     }
-            
+
                     // --- STEP B: SWITCH MODE & LOAD PREVIOUS STATE ---
                     const targetModuleId = isTurningOnCloneMode ? 9 : 3;
                     const lastSelectedId = isTurningOnCloneMode ? this.ampModeFxId9 : this.ampModeFxId3;
-            
+
                     if (isTurningOnCloneMode) {
                         cloneModeToggle.classList.add('on');
-                        
+
                         // Fix 1: Load Amp Types (Module 9) using the stored FX ID
                         const newFxId = populate(targetModuleId, lastSelectedId); 
-                        
+
                         this.writeCommand(this.commands.ampModes.clone);
                         if (irModuleElement) irModuleElement.classList.remove('disabled');
                         this.log('AMP panel switched to CLONE mode.', 'info');
                     } else {
                         cloneModeToggle.classList.remove('on');
-                        
+
                         // Fix 2: Load Amp Types (Module 3) using the stored FX ID
                         const newFxId = populate(targetModuleId, lastSelectedId);
-                        
+
                         this.writeCommand(this.commands.ampModes.factory);
                         if (irModuleElement) irModuleElement.classList.remove('disabled');
                         this.log('AMP panel switched to FACTORY mode.', 'info');
                     }
-                    
+
                     // --- STEP C: FORCE UI REBUILD AND SEND PARAMETER COMMANDS ---
-                    
+
                     // 1. Force the correct controls for the newly active FX type to display
                     const finalFxId = parseInt(ampTypeSelect.value, 10);
                     forceControlUpdate(targetModuleId, finalFxId); 
-                    
+
                     // 2. Write the command for the final FX type to update the device state immediately
                     const typeCommand = this.commands.effectTypes?.[targetModuleId]?.[finalFxId];
                     if (typeCommand) {
@@ -11726,6 +11730,11 @@
                 this.cancelSaveBtn.addEventListener('click', () => this.hideSaveModal());
                 this.confirmSaveBtn.addEventListener('click', () => this.saveCurrentPreset());
 
+                // Export/Import preset buttons
+                document.getElementById('exportPresetBtn').addEventListener('click', () => this.exportPreset());
+                document.getElementById('importPresetBtn').addEventListener('click', () => this.importPreset());
+                document.getElementById('presetFileInput').addEventListener('change', (e) => this.onPresetFileSelected(e));
+
                 // USB MIDI modal event listeners
                 this.confirmUsbBtn.addEventListener('click', () => this.confirmUsbDeviceSelection());
                 this.cancelUsbBtn.addEventListener('click', () => this.cancelUsbDeviceSelection());
@@ -11737,17 +11746,17 @@
                         const slider = event.target;
                         this.updateSliderProgress(slider);
                         const valueDisplay = slider.nextElementSibling;
-                        
+
                         if (slider.dataset.globalParam) {
                             const paramName = slider.dataset.globalParam;
                             const value = slider.value;
-                            
+
                             if (slider.min < 0) {
                                 valueDisplay.textContent = `${value}dB`;
                             } else {
                                 valueDisplay.textContent = value;
                             }
-                            
+
                             clearTimeout(slider.debounceTimer);
                             slider.debounceTimer = setTimeout(() => {
                                 const command = this.commands.globalCommands?.[paramName]?.[value];
@@ -11777,7 +11786,7 @@
 
                     const slider = targetSpan.previousElementSibling;
                     if (!slider || !slider.classList.contains('slider')) return;
-                    
+
                     const currentVal = targetSpan.textContent;
 
                     // Create an input element to replace the span
@@ -11807,7 +11816,7 @@
                         newValue = Math.max(min, Math.min(newValue, max));
 
                         slider.value = newValue;
-                        
+
                         // IMPORTANT: Trigger the original 'input' event so the device gets updated
                         slider.dispatchEvent(new Event('input', { bubbles: true }));
 
@@ -11855,14 +11864,14 @@
                 });
                 document.body.addEventListener('change', event => {
                     const target = event.target;
-                    
+
                     // Check for Module Type dropdown changes (like Amp Model/Clone Model selection)
                     if (target.classList.contains('dropdown-select') && target.id.startsWith('module-type-')) {
                         const moduleId = parseInt(target.id.split('-')[2], 10);
                         const fxId = parseInt(target.value, 10);
-                        
+
                         let lookupModuleId = moduleId; // Default is the physical ID (3)
-                
+
                         // --- FIX: REROUTING LOGIC FOR FX TYPE COMMAND LOOKUP ---
                         // If the dropdown is the Amp slot (ID 3) AND Clone Mode is active/commands exist under ID 9,
                         // use ID 9 for finding the EFFECT TYPE COMMAND.
@@ -11870,13 +11879,13 @@
                              lookupModuleId = 9;
                         }
                         // --------------------------------------------------------
-                        
+
                         // 1. Rebuild UI controls using the physical ID. (This correctly triggers parameter rebuild)
                         this.createParameterControls(moduleId, fxId);
-                        
+
                         // 2. Send command using the correct LOOKUP ID.
                         const command = this.commands.effectTypes?.[lookupModuleId]?.[fxId]; // Use the derived lookup ID
-                        
+
                         if (command) {
                             this.log(`UI Change: Module ${lookupModuleId} type set to Effect ${fxId}`, 'info');
                             this.writeCommand(command);
@@ -11895,31 +11904,31 @@
             createParameterControls(moduleId, fxId) {
                 const paramsSection = document.getElementById(`module-params-${moduleId}`);
                 if (!paramsSection) return;
-            
+
                 const effectDef = this.definitions.effectLibrary[fxId];
                 if (!effectDef) {
                     paramsSection.innerHTML = '';
                     return;
                 }
-            
+
                 const isCloneEffect = effectDef.name.startsWith('User Profile');
                 const logicalModuleId = isCloneEffect ? 9 : moduleId;
-            
+
                 const moduleTypeElement = document.querySelector(`.chain-module[data-module-id="${moduleId}"] .module-type`);
                 if (moduleTypeElement) {
                     moduleTypeElement.textContent = effectDef.name;
                 }
-            
+
                 let content = `<h4 style="color: #ccc;">${effectDef.name}</h4>`;
                 if (effectDef.descriptionEn) {
                     content += `<p class="effect-description">${effectDef.descriptionEn.replace(/\n/g, '<br>')}</p>`;
                 }
-            
+
                 effectDef.alg.forEach(param => {
                     const label = `<div class="control-label">${param.name}</div>`;
                     let controlHtml = '';
                     const dataAttributes = `data-module-id="${logicalModuleId}" data-fx-id="${fxId}" data-alg-id="${param.algId}"`;
-            
+
                     switch (param.widgetType) {
                         case 0:
                         case 3:
@@ -11946,7 +11955,7 @@
                     }
                     content += `<div class="control-row">${controlHtml}</div>`;
                 });
-            
+
                 // ✨ CHANGE 1: If it's the DELAY module, append the tap tempo HTML to the 'content' string.
                 if (moduleId == '7') {
                     const tapTempoHTML = `
@@ -11972,14 +11981,14 @@
                     `;
                     content += tapTempoHTML;
                 }
-            
+
                 paramsSection.innerHTML = content;
-                
+
                 // ✨ CHANGE 2: After rendering, if it was the DELAY module, call the setup logic.
                 if (moduleId == '7') {
                     this.setupTapTempo();
                 }
-            
+
                 // After creating the controls, initialize the progress style for the new sliders.
                 paramsSection.querySelectorAll('.slider').forEach(slider => {
                     this.updateSliderProgress(slider);
@@ -11990,47 +11999,47 @@
                 const tapButton = document.getElementById('tap-button-7');
                 const bpmInput = document.getElementById('tap-bpm-input-7');
                 const divisionButtonsContainer = document.getElementById('note-divisions-7');
-            
+
                 if (!tapButton || !bpmInput || !divisionButtonsContainer) {
                     return;
                 }
-            
+
                 const divisionButtons = divisionButtonsContainer.querySelectorAll('.note-btn');
                 let tapTimestamps = [], currentBpm = 120.0;
                 let timeoutId = null, beatIntervalId = null;
-            
+
                 const updateDelayFromBpm = () => {
                     const delayTimeSlider = document.querySelector('#module-params-7 .slider[data-alg-id="1"]');
                     const delayTimeDisplay = document.getElementById('delay-time-ms-7');
                     if (!delayTimeSlider || !delayTimeDisplay) return;
-            
+
                     const activeMultiplierBtn = divisionButtonsContainer.querySelector('.note-btn.active');
                     const noteMultiplier = activeMultiplierBtn ? parseFloat(activeMultiplierBtn.dataset.multiplier) : 1.0;
-            
+
                     currentBpm = Math.max(20, Math.min(currentBpm, 300));
                     currentBpm = Math.round(currentBpm * 2) / 2;
-            
+
                     const finalDelayTimeMs = ((60 * 1000) / currentBpm) * noteMultiplier;
-                    
+
                     const minTime = parseFloat(delayTimeSlider.min);
                     const maxTime = parseFloat(delayTimeSlider.max);
-                    
+
                     delayTimeDisplay.textContent = `${Math.round(finalDelayTimeMs)}ms`;
-            
+
                     if (finalDelayTimeMs > maxTime) {
                         delayTimeDisplay.classList.add('out-of-range');
                     } else {
                         delayTimeDisplay.classList.remove('out-of-range');
                     }
-            
+
                     const sliderValue = Math.max(minTime, Math.min(Math.round(finalDelayTimeMs), maxTime));
-                    
+
                     delayTimeSlider.value = sliderValue;
                     delayTimeSlider.dispatchEvent(new Event('input', { bubbles: true }));
                     bpmInput.value = currentBpm.toFixed(1);
                     startBeatIndicator();
                 };
-            
+
                 const calculateBpmFromTaps = () => {
                     if (tapTimestamps.length < 2) return;
                     const intervals = tapTimestamps.slice(1).map((t, i) => t - tapTimestamps[i]);
@@ -12040,7 +12049,7 @@
                         updateDelayFromBpm();
                     }
                 };
-            
+
                 const startBeatIndicator = () => {
                     clearInterval(beatIntervalId);
                     if(currentBpm <= 0) return;
@@ -12050,7 +12059,7 @@
                         setTimeout(() => tapButton.classList.remove('beat-flash'), 100);
                     }, intervalMs);
                 };
-            
+
                 tapButton.addEventListener('click', () => {
                     clearTimeout(timeoutId);
                     tapTimestamps.push(Date.now());
@@ -12058,7 +12067,7 @@
                     calculateBpmFromTaps();
                     timeoutId = setTimeout(() => tapTimestamps = [], 2000);
                 });
-            
+
                 bpmInput.addEventListener('change', () => {
                     const val = parseFloat(bpmInput.value);
                     if (!isNaN(val)) {
@@ -12066,11 +12075,11 @@
                         updateDelayFromBpm();
                     }
                 });
-            
+
                 bpmInput.addEventListener('dblclick', () => {
                     bpmInput.select();
                 });
-            
+
                 divisionButtons.forEach(button => {
                     button.addEventListener('click', e => {
                         divisionButtons.forEach(btn => btn.classList.remove('active'));
@@ -12078,7 +12087,7 @@
                         updateDelayFromBpm();
                     });
                 });
-                
+
                 currentBpm = parseFloat(bpmInput.value);
                 startBeatIndicator();
             }
@@ -12100,7 +12109,7 @@
                 this.patchListContainer.classList.add('locked');
                 this.log('UI Locked: Syncing preset state...', 'info');
             }
-            
+
             unlockPatchList() {
                 this.isSyncingState = false;
                 this.patchListContainer.classList.remove('locked');
@@ -12117,7 +12126,7 @@
                     moduleElement.classList.toggle('disabled', !isOn);
                 }
             }
-            
+
             onParameterChange(element) {
                 // This generic logic correctly updates the text right next to ANY slider.
                 if (element.classList.contains('slider')) {
@@ -12126,15 +12135,15 @@
                         valueSpan.textContent = element.value;
                     }
                 }
-            
+
                 let command;
                 let moduleId, fxId, algId, value;
                 let lookupModuleId; // Variable for determining the correct command key
-            
+
                 if (element.id && element.id.startsWith('module-type-')) {
                     moduleId = parseInt(element.id.split('-')[2], 10);
                     fxId = parseInt(element.value, 10);
-                    
+
                     // --- CORRECTED LOGIC FOR EFFECT TYPES ---
                     // If the ID is 3 (physical Amp slot) and Clone Mode is visually active/enabled,
                     // we assume the effect type being chosen is a Clone Amp effect (ID 9) 
@@ -12142,22 +12151,22 @@
                     lookupModuleId = (moduleId === 3 && document.getElementById('amp-clone-mode').classList.contains('on')) 
                                      ? 9 : moduleId;
                     // ----------------------------------------
-                    
+
                     command = this.commands.effectTypes?.[lookupModuleId]?.[fxId];
                     this.log(`UI Change: Module ${moduleId} type set to Effect ${fxId} (Lookup ID: ${lookupModuleId})`, 'info');
-            
+
                 } else if (element.dataset.algId !== undefined) {
                     // This handles parameter changes (sliders, toggles, dropdowns)
                     moduleId = parseInt(element.dataset.moduleId, 10); // This should be 9 for Clone Mode parameters
                     fxId = parseInt(element.dataset.fxId, 10); 
                     algId = parseInt(element.dataset.algId, 10);
-                    
+
                     // --- CORRECTED LOGIC FOR PARAMETERS ---
                     // Since the parameter controls are rebuilt with data-module-id="9" when in Clone Mode,
                     // we must ensure the lookup *uses* 9 and does not mistakenly fall back to 3.
                     // We use the parameter's dataset value directly for lookup.
                     lookupModuleId = moduleId; 
-                    
+
                     // --- CRITICAL CHECK ---
                     // If the element's data-module-id is *physically* 3 but its effect type is Clone (FXID >= 901),
                     // we might still need to reroute. Given your setup rebuilds controls with ID 9:
@@ -12167,24 +12176,24 @@
                         lookupModuleId = 9; 
                     }
                     // ----------------------------------------
-                    
+
                     if (element.classList.contains('toggle-switch')) {
                         value = element.classList.contains('on') ? 1 : 0;
                     } else {
                         value = parseFloat(element.value);
                     }
-                    
+
                     this.log(`UI Change: M${moduleId}.E${fxId}.A${algId} = ${value} (Lookup ID: ${lookupModuleId})`, 'info');
-                    
+
                     // Use the explicit lookupModuleId (which will be 9 if set correctly)
                     command = this.commands.parameters?.[lookupModuleId]?.[algId]?.[value];
                 }
-            
+
                 if (command && !this.isPresetModified && !this.isApplyingState) {
                     this.isPresetModified = true;
                     this.updatePresetModifiedUI(true);
                 }
-            
+
                 if (command) {
                     this.writeCommand(command);
                 } else {
@@ -12206,7 +12215,7 @@
                     // Step 1: Try to detect USB MIDI devices
                     this.log('Checking for USB MIDI devices...', 'info');
                     const hasUsbDevices = await this.detectAndListUsbMidiDevices();
-                    
+
                     if (hasUsbDevices) {
                         // Show the USB device selection modal
                         this.log('USB MIDI devices found. Showing selection dialog...', 'info');
@@ -12233,11 +12242,11 @@
 
                     // Request MIDI access
                     this.midiAccess = await navigator.requestMIDIAccess({ sysex: true });
-                    
+
                     // Get all inputs and outputs
                     const inputs = Array.from(this.midiAccess.inputs.values());
                     const outputs = Array.from(this.midiAccess.outputs.values());
-                    
+
                     if (inputs.length === 0 || outputs.length === 0) {
                         this.log('No USB MIDI input or output devices found', 'info');
                         return false;
@@ -12245,7 +12254,7 @@
 
                     // Group inputs and outputs by device name (they usually share the same name)
                     const deviceMap = new Map();
-                    
+
                     inputs.forEach(input => {
                         const name = input.name || 'Unknown Input';
                         if (!deviceMap.has(name)) {
@@ -12285,7 +12294,7 @@
                         }));
 
                     this.log(`Found ${this.usbDevicePairs.length} USB MIDI device pair(s)`, 'info');
-                    
+
                     return this.usbDevicePairs.length > 0;
                 } catch (error) {
                     this.log(`Error accessing MIDI devices: ${error.message}`, 'error');
@@ -12303,11 +12312,11 @@
                     const deviceItem = document.createElement('div');
                     deviceItem.className = 'usb-device-pair';
                     deviceItem.dataset.deviceIndex = index;
-                    
+
                     const deviceName = pair.name || `Device ${index + 1}`;
                     const inputName = pair.inputName || 'Unknown';
                     const outputName = pair.outputName || 'Unknown';
-                    
+
                     deviceItem.innerHTML = `
                         <div class="usb-device-pair-title">🎛️ ${deviceName}</div>
                         <div class="usb-device-io">
@@ -12317,7 +12326,7 @@
                             <span class="usb-device-io-label">Output:</span> ${outputName}
                         </div>
                     `;
-                    
+
                     deviceItem.addEventListener('click', () => this.selectUsbDevice(index, deviceItem));
                     this.usbDeviceList.appendChild(deviceItem);
                 });
@@ -12331,7 +12340,7 @@
                 document.querySelectorAll('.usb-device-pair').forEach(item => {
                     item.classList.remove('selected');
                 });
-                
+
                 // Mark new selection
                 element.classList.add('selected');
                 this.selectedUsbDevice = this.usbDevicePairs[index];
@@ -12344,7 +12353,7 @@
                     alert('Please select a USB MIDI device first');
                     return;
                 }
-                
+
                 this.usbMidiModal.style.display = 'none';
                 this.connectUSB(this.selectedUsbDevice);
             }
@@ -12371,7 +12380,7 @@
                     this.isConnected = true;
                     this.updateConnectionUI();
                     this.log(`✅ USB MIDI Connected: ${usbDevice.name}`, 'received');
-                    
+
                     await this.runInitialSyncSequence();
                 } catch (error) {
                     this.log(`USB MIDI connection failed: ${error.message}`, 'error');
@@ -12399,12 +12408,12 @@
                     this.characteristic = await service.getCharacteristic(this.CHARACTERISTIC_UUID);
                     await this.characteristic.startNotifications();
                     this.characteristic.addEventListener('characteristicvaluechanged', (event) => this.handleNotification(event));
-                    
+
                     this.connectionType = 'ble';
                     this.isConnected = true;
                     this.updateConnectionUI();
                     this.log('✅ Connected successfully!', 'received');
-            
+
                     this.runInitialSyncSequence();
                 } catch (error) {
                     this.log(`Bluetooth connection failed: ${error.message}`, 'error');
@@ -12415,7 +12424,7 @@
             handleMidiMessage(event) {
                 const data = event.data;
                 const dataHex = Array.from(data).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
-                
+
                 // Check if this is a SysEx message (starts with F0 and ends with F7)
                 if (data.length < 4 || data[0] !== 0xF0 || data[data.length - 1] !== 0xF7) {
                     // Not a complete SysEx message, buffer it
@@ -12434,7 +12443,7 @@
 
                 // We have a complete SysEx message
                 let message = data;
-                
+
                 // If there was a partial buffer, concatenate with it
                 if (this.usbMidiBuffer !== null) {
                     const combined = new Uint8Array(this.usbMidiBuffer.length + data.length);
@@ -12491,7 +12500,7 @@
 
                     if (allPacketsReceived) {
                         this.log(`✅ All ${totalPackets} packets received for [${responseId}]`, 'info');
-                        
+
                         // Reassemble payload from all packets
                         const reassembledPayload = [];
                         for (let i = 0; i < totalPackets; i++) {
@@ -12552,7 +12561,7 @@
                 if (this.device && this.device.gatt.connected) {
                     await this.device.gatt.disconnect();
                 }
-                
+
                 // Handle USB disconnection
                 if (this.midiInput) {
                     this.midiInput.onmidimessage = null;
@@ -12561,7 +12570,7 @@
                 if (this.midiOutput) {
                     this.midiOutput = null;
                 }
-                
+
                 this.connectionType = null;
                 this.isConnected = false;
                 this.isSyncing = false;
@@ -12572,7 +12581,7 @@
             updateConnectionUI() {
                 const isConnected = this.isConnected;
                 const statusLabel = this.connectionType === 'usb' ? 'USB Connected' : this.connectionType === 'ble' ? 'BLE Connected' : 'Disconnected';
-                
+
                 this.connectBtn.disabled = isConnected;
                 this.disconnectBtn.disabled = !isConnected;
                 this.syncPresetNamesBtn.disabled = !isConnected;
@@ -12589,12 +12598,12 @@
                     this.log('Device not connected', 'error');
                     return;
                 }
-                
+
                 try {
                     const hexBytes = commandString.match(/.{1,2}/g).map(byte => parseInt(byte, 16));
                     const command = new Uint8Array(hexBytes);
                     this.log(`Sending: ${commandString.toUpperCase()}`, 'sent');
-                    
+
                     // Send via USB MIDI or BLE depending on connection type
                     if (this.connectionType === 'usb' && this.midiOutput) {
                         // Send via Web MIDI API (remove 8080 header - USB MIDI adds it automatically)
@@ -12631,21 +12640,542 @@
                 // 1. Remove the trailing asterisk and any space before it.
                 // 2. Trim any remaining leading/trailing whitespace.
                 const cleanedName = currentPatchName.replace(/\s*\*$/, '').trim();
-                
+
                 // Extract only the number from "PXX" or "FXX"
                 const currentPatchNum = parseInt(currentPatchNumText.substring(1), 10);
-            
+
                 this.presetNameInput.value = cleanedName;
                 this.presetNumberInput.value = currentPatchNum;
-                
+
                 this.saveModal.style.display = 'block';
                 this.advancedSettingsPanel.classList.remove('visible'); // Hide settings panel
             }
-            
+
             hideSaveModal() {
                 this.saveModal.style.display = 'none';
             }
-            
+
+            // ============================================================================
+            // EXPORT PRESET: Convert current UI state to human-readable JSON
+            // ============================================================================
+            async exportPreset() {
+                this.log('Exporting preset...', 'info');
+
+                try {
+                    // Gather current state from UI
+                    const ampModeToggle = document.getElementById('amp-clone-mode');
+                    const ampMode = ampModeToggle.classList.contains('on') ? 'Clone' : 'Normal';
+
+                    const volumeSlider = document.querySelector('.patch-volume-module .slider');
+                    const presetVolume = parseInt(volumeSlider.value);
+
+                    // Build modules object with current state
+                    const modules = {};
+                    const moduleElements = document.querySelectorAll('.chain-module[draggable="true"], #fixed-chain-block');
+
+                    const isCloneModeActive = ampModeToggle.classList.contains('on');
+
+                    this.definitions.modules.forEach(moduleDef => {
+                        const moduleId = moduleDef.moduleId;
+                        const moduleName = moduleDef.name;
+
+                        // AMP (3) and Clone (9) are mutually exclusive.
+                        // Export only the active one based on clone mode.
+                        if (moduleId === 9 && !isCloneModeActive) return;
+                        if (moduleId === 3 && isCloneModeActive) return;
+
+                        // Determine the enable state
+                        let isEnabled;
+                        if (moduleId === 9 || moduleId === 3) {
+                            const sharedToggle = document.getElementById('module-enable-3');
+                            isEnabled = sharedToggle ? sharedToggle.classList.contains('on') : false;
+                        } else {
+                            const enableToggle = document.getElementById(`module-enable-${moduleId}`);
+                            isEnabled = enableToggle ? enableToggle.classList.contains('on') : false;
+                        }
+
+                        // Determine the effect ID
+                        // Clone (9) uses AMP's dropdown (module-type-3) when active.
+                        // Since we skip the inactive mode, the dropdown always shows the right value.
+                        const selectId = (moduleId === 9) ? 3 : moduleId;
+                        const selectEl = document.getElementById(`module-type-${selectId}`);
+                        let fxId = selectEl ? parseInt(selectEl.value) : null;
+
+                        // If no select element or no value, infer from module definition (e.g. noise gate)
+                        if ((fxId === null || isNaN(fxId) || fxId === 0) && moduleDef.effects && moduleDef.effects.length > 0) {
+                            fxId = moduleDef.effects[0];
+                        }
+
+                        // Skip only if we truly have no valid effect
+                        if (fxId === null || fxId === 0 || !this.definitions.effectLibrary[fxId]) {
+                            modules[moduleName] = {
+                                enabled: isEnabled,
+                                effect: null,
+                                parameters: {}
+                            };
+                            return;
+                        }
+
+                        // Get effect name
+                        const effectName = this.definitions.effectLibrary[fxId].name;
+
+                        // Get all parameters for this effect
+                        const parameters = {};
+                        const effectDef = this.definitions.effectLibrary[fxId];
+
+                        // Clone (9) renders its controls in AMP's slot (module-id 3).
+                        // Since we skip the inactive mode above, controls are always in the DOM.
+                        let uiModuleId = (moduleId === 9) ? 3 : moduleId;
+
+                        if (effectDef.alg) {
+                            effectDef.alg.forEach(param => {
+                                const algId = param.algId;
+                                const paramName = param.name;
+                                const control = document.querySelector(
+                                    `[data-module-id="${uiModuleId}"][data-alg-id="${algId}"]`
+                                );
+
+                                if (control) {
+                                    let value;
+                                    if (control.classList.contains('slider')) {
+                                        value = parseFloat(control.value);
+                                    } else if (control.classList.contains('toggle-switch')) {
+                                        value = control.classList.contains('on') ? 1 : 0;
+                                    } else if (control.tagName === 'SELECT') {
+                                        value = parseInt(control.value);
+                                    }
+
+                                    if (value !== undefined) {
+                                        parameters[paramName] = value;
+                                    }
+                                }
+                            });
+                        }
+
+                        modules[moduleName] = {
+                            enabled: isEnabled,
+                            effect: effectName,
+                            parameters: parameters
+                        };
+                    });
+
+                    // Get signal chain order
+                    const container = document.querySelector('.chain-flow');
+                    const signalChain = [];
+                    const moduleMap = {};
+
+                    // Build reverse map
+                    this.definitions.modules.forEach(mod => {
+                        moduleMap[mod.moduleId] = mod.name;
+                    });
+
+                    container.querySelectorAll('[data-module-id], #fixed-chain-block').forEach(el => {
+                        const moduleId = el.dataset.moduleId;
+                        if (moduleId) {
+                            signalChain.push(moduleMap[parseInt(moduleId)]);
+                        } else if (el.id === 'fixed-chain-block') {
+                            // Fixed block contains DRV, AMP, IR, EQ
+                            signalChain.push('DRV', 'AMP', 'IR', 'EQ');
+                        }
+                    });
+
+                    // Remove duplicates preserving order
+                    const uniqueChain = [...new Set(signalChain)];
+
+                    // Build complete preset object
+                    const presetName = document.getElementById('patchName').textContent.replace(/\s*\*$/, '').trim();
+
+                    const presetData = {
+                        version: "1.0",
+                        presetName: presetName,
+                        description: "Exported from PocketEdit",
+                        ampMode: ampMode,
+                        presetVolume: presetVolume,
+                        modules: modules,
+                        signalChain: uniqueChain,
+                        metadata: {
+                            createdDate: new Date().toISOString().split('T')[0],
+                            author: "PocketEdit",
+                            tags: []
+                        }
+                    };
+
+                    // Download as JSON file
+                    const jsonString = JSON.stringify(presetData, null, 2);
+                    const defaultFileName = `${presetName.replace(/\s+/g, '_')}_${Date.now()}.json`;
+
+                    // Use File System Access API if available (lets us know the actual chosen name)
+                    if (window.showSaveFilePicker) {
+                        try {
+                            const handle = await window.showSaveFilePicker({
+                                suggestedName: defaultFileName,
+                                types: [{
+                                    description: 'JSON Preset',
+                                    accept: { 'application/json': ['.json'] }
+                                }]
+                            });
+                            const writable = await handle.createWritable();
+                            await writable.write(jsonString);
+                            await writable.close();
+                            this.log(`✅ Preset exported: ${handle.name}`, 'success');
+                        } catch (err) {
+                            if (err.name !== 'AbortError') throw err;
+                            this.log('Export cancelled by user.', 'info');
+                        }
+                    } else {
+                        // Fallback for browsers without File System Access API
+                        const blob = new Blob([jsonString], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = defaultFileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+                        this.log(`✅ Preset exported: ${defaultFileName}`, 'success');
+                    }
+
+                } catch (error) {
+                    this.log(`❌ Export failed: ${error.message}`, 'error');
+                }
+            }
+
+            // ============================================================================
+            // CONVERT: Human-readable JSON → fullPresetData with validation
+            // ============================================================================
+            convertHumanReadableToFullPresetData(jsonData) {
+                this.log('Converting human-readable preset to internal format...', 'info');
+
+                try {
+                    // Validate version
+                    if (jsonData.version !== "1.0") {
+                        throw new Error("Unsupported preset version: " + jsonData.version);
+                    }
+
+                    // Initialize result structure
+                    const fullPresetData = {
+                        ampMode: jsonData.ampMode || "Normal",
+                        states: {},
+                        order: jsonData.signalChain || [],
+                        presetVolume: Math.max(0, Math.min(127, jsonData.presetVolume || 75)),
+                        selectedEffects: {},
+                        parameters: {}
+                    };
+
+                    // Process each module
+                    const REVERSE_MODULE_MAP = {};
+                    this.definitions.modules.forEach(mod => {
+                        REVERSE_MODULE_MAP[mod.name] = mod.moduleId;
+                    });
+
+                    for (const [moduleName, moduleData] of Object.entries(jsonData.modules)) {
+                        const moduleId = REVERSE_MODULE_MAP[moduleName];
+                        if (moduleId === undefined) {
+                            this.log(`⚠ Unknown module: ${moduleName}, skipping`, 'warning');
+                            continue;
+                        }
+
+                        // Set module state
+                        fullPresetData.states[moduleName] = moduleData.enabled === true;
+
+                        // Skip only if there's no effect data at all
+                        if (moduleData.effect === null) {
+                            this.log(`ℹ Module ${moduleName} has no effect data, skipping`, 'info');
+                            continue;
+                        }
+
+                        // Find effect ID by name
+                        let fxId = null;
+                        for (const [id, effectDef] of Object.entries(this.definitions.effectLibrary)) {
+                            if (effectDef.name === moduleData.effect) {
+                                fxId = parseInt(id);
+                                break;
+                            }
+                        }
+
+                        if (fxId === null) {
+                            throw new Error(`Effect not found: Module ${moduleName} references unknown effect "${moduleData.effect}"`);
+                        }
+
+                        fullPresetData.selectedEffects[moduleId] = fxId;
+
+                        // Process parameters
+                        const effectDef = this.definitions.effectLibrary[fxId];
+                        if (!effectDef.alg) {
+                            this.log(`Effect ${moduleData.effect} has no parameters`, 'info');
+                            continue;
+                        }
+
+                        fullPresetData.parameters[moduleId] = {};
+
+                        for (const param of effectDef.alg) {
+                            const paramName = param.name;
+                            const algId = param.algId;
+                            const paramValue = moduleData.parameters[paramName];
+
+                            if (paramValue === undefined) {
+                                // Use default value if not specified
+                                fullPresetData.parameters[moduleId][algId] = param.defaultValue;
+                                this.log(`Parameter ${moduleName}.${paramName} not found, using default: ${param.defaultValue}`, 'info');
+                                continue;
+                            }
+
+                            // Validate and clamp value
+                            let finalValue = paramValue;
+
+                            if (param.min !== undefined && param.max !== undefined) {
+                                finalValue = Math.max(param.min, Math.min(param.max, paramValue));
+
+                                if (finalValue !== paramValue) {
+                                    this.log(`Parameter ${moduleName}.${paramName} clamped from ${paramValue} to ${finalValue}`, 'warning');
+                                }
+                            }
+
+                            fullPresetData.parameters[moduleId][algId] = finalValue;
+                            this.log(`✔ Loaded M${moduleId}.A${algId} (${paramName}) = ${finalValue}`, 'info');
+                        }
+                    }
+
+                    this.log('✅ Conversion successful', 'success');
+                    return fullPresetData;
+
+                } catch (error) {
+                    this.log(`❌ Conversion failed: ${error.message}`, 'error');
+                    throw error;
+                }
+            }
+
+            // ============================================================================
+            // IMPORT PRESET: File dialog and JSON load
+            // ============================================================================
+            async importPreset() {
+                try {
+                    if (!this.isConnected) {
+                        alert("Please connect to the device first.");
+                        return;
+                    }
+
+                    // Trigger file input dialog
+                    const fileInput = document.getElementById('presetFileInput');
+                    fileInput.click();
+
+                } catch (error) {
+                    this.log(`❌ Import failed: ${error.message}`, 'error');
+                }
+            }
+
+            // Handle file selection
+            onPresetFileSelected(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const jsonData = JSON.parse(e.target.result);
+                        this.log(`📁 Loaded preset file: ${file.name}`, 'info');
+
+                        // Convert and validate
+                        const fullPresetData = this.convertHumanReadableToFullPresetData(jsonData);
+
+                        // Apply to UI
+                        this.log('Applying preset state to UI...', 'info');
+                        this.applyPresetState(fullPresetData);
+
+                        // Sync COMPLETE preset state to device (not just parameters)
+                        this.log('Syncing complete preset state to device...', 'info');
+                        await this.syncPresetStateToDevice(fullPresetData);
+
+                        this.log(`✅ Preset imported successfully: ${jsonData.presetName}`, 'success');
+                        alert(`Preset "${jsonData.presetName}" imported and synced to device!`);
+
+                    } catch (error) {
+                        this.log(`❌ Import error: ${error.message}`, 'error');
+                        alert(`Failed to import preset: ${error.message}`);
+                    }
+
+                    // Reset file input
+                    event.target.value = '';
+                };
+
+                reader.onerror = () => {
+                    this.log('❌ Failed to read preset file', 'error');
+                };
+
+                reader.readAsText(file);
+            }
+
+            // ============================================================================
+            // SYNC PRESET STATE: Send complete preset state to device
+            // (module states, effects, volume, parameters, and chain)
+            // ============================================================================
+            async syncPresetStateToDevice(fullPresetData) {
+                try {
+                    let syncedCount = 0;
+
+                    this.log('Syncing complete preset state to device...', 'info');
+
+                    // 1. SYNC PRESET VOLUME (uses globalCommands, not onParameterChange)
+                    if (fullPresetData.presetVolume !== undefined) {
+                        const value = fullPresetData.presetVolume;
+                        const command = this.commands.globalCommands?.presetVolume?.[value];
+                        if (command) {
+                            await this.writeCommand(command);
+                            syncedCount++;
+                            await new Promise(resolve => setTimeout(resolve, this.syncDelayMs));
+                            this.log(`[SYNC] Preset volume: ${value}`, 'received');
+                        } else {
+                            this.log(`⚠ No command for preset volume = ${value}`, 'warning');
+                        }
+                    }
+
+                    // 2. SYNC MODULE ENABLE/DISABLE STATES (always send, don't compare to UI)
+                    if (fullPresetData.states) {
+                        for (const [moduleName, isEnabled] of Object.entries(fullPresetData.states)) {
+                            const moduleDef = this.definitions.modules.find(m => m.name === moduleName);
+                            if (!moduleDef) continue;
+
+                            const moduleId = moduleDef.moduleId;
+                            // Clone (9) shares module state commands with AMP (3)
+                            const commandModuleId = (moduleId === 9) ? 3 : moduleId;
+                            await this.sendModuleState(commandModuleId, isEnabled);
+                            syncedCount++;
+                            await new Promise(resolve => setTimeout(resolve, this.syncDelayMs));
+                            this.log(`[SYNC] Module ${moduleId} (${moduleName}) state: ${isEnabled}`, 'received');
+                        }
+                    }
+
+                    // 2b. SYNC AMP MODE (Clone vs Factory)
+                    if (fullPresetData.ampMode) {
+                        const ampModeCommand = fullPresetData.ampMode === 'Clone'
+                            ? this.commands.ampModes?.clone
+                            : this.commands.ampModes?.factory;
+                        if (ampModeCommand) {
+                            await this.writeCommand(ampModeCommand);
+                            syncedCount++;
+                            await new Promise(resolve => setTimeout(resolve, this.syncDelayMs));
+                            this.log(`[SYNC] Amp mode: ${fullPresetData.ampMode}`, 'received');
+                        }
+                    }
+
+                    // 3. SYNC EFFECT SELECTIONS (always send, don't compare to UI)
+                    if (fullPresetData.selectedEffects) {
+                        for (const [moduleIdStr, fxId] of Object.entries(fullPresetData.selectedEffects)) {
+                            const moduleId = parseInt(moduleIdStr);
+
+                            // NR (module 0) has only one effect and no type-switch command — skip it
+                            if (moduleId === 0) continue;
+
+                            // Determine correct lookup ID for command (clone mode rerouting)
+                            let lookupModuleId = moduleId;
+                            if (moduleId === 3 && this.commands.effectTypes?.[9]?.[fxId] !== undefined) {
+                                lookupModuleId = 9;
+                            }
+
+                            const command = this.commands.effectTypes?.[lookupModuleId]?.[fxId];
+                            if (command) {
+                                await this.writeCommand(command);
+                                syncedCount++;
+                                await new Promise(resolve => setTimeout(resolve, this.syncDelayMs));
+                                this.log(`[SYNC] Module ${lookupModuleId} effect: ${fxId}`, 'received');
+                            } else {
+                                this.log(`⚠ No command for module ${lookupModuleId} effect ${fxId}`, 'warning');
+                            }
+                        }
+                    }
+
+                    // 4. SYNC SIGNAL CHAIN ORDER
+                    if (fullPresetData.order && fullPresetData.order.length > 0) {
+                        this.updateChainOrder();
+                        syncedCount++;
+                        await new Promise(resolve => setTimeout(resolve, this.syncDelayMs));
+                        this.log(`[SYNC] Signal chain order: ${fullPresetData.order.join(' → ')}`, 'received');
+                    }
+
+                    // 5. SYNC ALL PARAMETERS
+                    if (fullPresetData.parameters) {
+                        const paramCount = await this.syncParametersToDevice(fullPresetData.parameters);
+                        syncedCount += paramCount;
+                    }
+
+                    this.log(`✅ Complete preset state synced to device (${syncedCount} commands sent)`, 'success');
+
+                } catch (error) {
+                    this.log(`❌ Preset state sync failed: ${error.message}`, 'error');
+                    throw error;
+                }
+            }
+
+            // ============================================================================
+            // SYNC PARAMETERS: Send all parameters to device individually
+            // ============================================================================
+            async syncParametersToDevice(parameters) {
+                const totalParams = Object.keys(parameters)
+                    .reduce((sum, moduleId) => sum + Object.keys(parameters[moduleId]).length, 0);
+                let syncedCount = 0;
+
+                try {
+                    // Iterate through all parameters
+                    for (const moduleIdStr in parameters) {
+                        const moduleId = parseInt(moduleIdStr);
+                        const algValues = parameters[moduleId];
+
+                        for (const algIdStr in algValues) {
+                            const algId = parseInt(algIdStr);
+                            const value = algValues[algId];
+
+                            // Get UI control
+                            // Clone (9) renders its controls in AMP's slot (module-id 3)
+                            const uiModuleId = (moduleId === 9) ? 3 : moduleId;
+                            const control = document.querySelector(
+                                `[data-module-id="${uiModuleId}"][data-alg-id="${algId}"]`
+                            );
+
+                            if (!control) {
+                                this.log(`⚠ Control not found for M${moduleId}.A${algId}, skipping`, 'warning');
+                                syncedCount++;
+                                continue;
+                            }
+
+                            // Update control value
+                            if (control.classList.contains('slider')) {
+                                control.value = value;
+                                const valueDisplay = control.nextElementSibling;
+                                if (valueDisplay) valueDisplay.textContent = value;
+                                this.updateSliderProgress(control);
+                            } else if (control.classList.contains('toggle-switch')) {
+                                const shouldBeOn = value === 1;
+                                const isOn = control.classList.contains('on');
+                                if (shouldBeOn !== isOn) {
+                                    control.classList.toggle('on');
+                                }
+                            } else if (control.tagName === 'SELECT') {
+                                control.value = value;
+                            }
+
+                            // CRITICAL FIX: Call onParameterChange directly to send command to device
+                            // This ensures writeCommand is called for all control types
+                            this.onParameterChange(control);
+
+                            syncedCount++;
+
+                            // Wait 50ms between parameter sends to avoid overwhelming device
+                            await new Promise(resolve => setTimeout(resolve, this.syncDelayMs));
+
+                            this.log(`Synced M${moduleId}.A${algId}: ${value} (${syncedCount}/${totalParams})`, 'received');
+                        }
+                    }
+
+                    this.log(`✅ All ${totalParams} parameters synced to device`, 'success');
+                    return syncedCount;
+
+                } catch (error) {
+                    this.log(`❌ Parameter sync failed: ${error.message}`, 'error');
+                    throw error;
+                }
+            }
+
             waitForAck() {
                 return new Promise((resolve) => {
                     const timeout = setTimeout(() => {
@@ -12654,7 +13184,7 @@
                             resolve(false); // Resolve with false on timeout
                         }
                     }, 500); // Was 200ms timeout for an ACK, ~500ms is needed for saving preset via BLE
-            
+
                     this.ackPromiseResolve = (success = true) => {
                         clearTimeout(timeout);
                         this.ackPromiseResolve = null;
@@ -12685,10 +13215,10 @@
 
                     overlayText.textContent = 'Syncing Global Settings...';
                     await this.syncGlobalSettings(true);
-                    
+
                     overlayText.textContent = 'Syncing Preset Names & State...';
                     await this.syncPresetNames(true);
-                    
+
                 } catch (error) {
                     this.log(`❌ Auto-sync sequence failed: ${error.message}`, 'error');
                     alert(`Initial sync failed: ${error.message}. You may need to sync manually.`);
@@ -12704,21 +13234,21 @@
                     if (!this.isConnected) return isAutomated ? reject(new Error('Not connected')) : resolve();
                     this.log('Requesting global settings...', 'info');
                     this.isWaitingForGlobals = true;
-            
+
                     const timeout = setTimeout(() => {
                         this.isWaitingForGlobals = false;
                         this.globalSettingsPromiseResolve = null;
                         if (isAutomated) reject(new Error('Global settings sync timed out.'));
                         else resolve();
                     }, 3000);
-            
+
                     this.globalSettingsPromiseResolve = () => {
                         clearTimeout(timeout);
                         this.isWaitingForGlobals = false;
                         this.globalSettingsPromiseResolve = null;
                         resolve();
                     };
-            
+
                     await this.writeCommand('8080F00B0900010000000201020100F7');
                 });
             }
@@ -12726,22 +13256,22 @@
             decodeDbValue(byte1Hex, byte2Hex) {
                 const byte1 = parseInt(byte1Hex, 16);
                 const byte2 = parseInt(byte2Hex, 16);
-            
+
                 if (byte1 === 0x0F) { // Mid-Negative Range (-1 to -16)
                     return byte2 - 16;
                 }
                 if (byte1 === 0x0E) { // Low-Negative Range (-17 to -20)
                     return byte2 - 32;
                 }
-                
+
                 // Corrected logic for Positive Range (0 and up)
                 return (byte1 * 16) + byte2;
             }
-            
+
             encodeDbValue(dbValue) {
                 const db = parseInt(dbValue, 10);
                 let byte1, byte2;
-            
+
                 if (db >= 0) {
                     // Corrected logic for Positive Range
                     byte1 = Math.floor(db / 16);
@@ -12757,73 +13287,73 @@
                 }
                 return byte1.toString(16).padStart(2, '0') + byte2.toString(16).padStart(2, '0');
             }
-            
+
             decodeGlobalSettings(hexString) {
                 this.log('Decoding global settings packet...', 'info');
                 try {
                     const payload = hexString.substring(10, hexString.length - 2);
-            
+
                     // --- Reusable Debug Helper ---
                     const logWindow = (payloadStr, charOffset, label) => {
                         const windowSize = 8; // 4 bytes on each side
                         const start = Math.max(0, charOffset - windowSize);
                         const end = Math.min(payloadStr.length, charOffset + 4 + windowSize);
-                        
+
                         const preWindow = payloadStr.substring(start, charOffset);
                         const targetBytes = payloadStr.substring(charOffset, charOffset + 4);
                         const postWindow = payloadStr.substring(charOffset + 4, end);
-            
+
                         const formatHex = (hex) => hex.match(/.{1,2}/g)?.join(' ') || '';
-                        
+
                         this.log(`[Debug] ${label}: ${formatHex(preWindow)} < ${formatHex(targetBytes)} > ${formatHex(postWindow)}`, 'info');
                     };
-            
+
                     // --- Decode Input Level (Index 48-49 -> char 96) ---
                     logWindow(payload, 172, 'Input Level');
                     const il_b1 = payload.substring(172, 174);
                     const il_b2 = payload.substring(174, 176);
                     const inputLevel = this.decodeDbValue(il_b1, il_b2);
                     this.log(`Decoded Input Level: ${inputLevel}dB`, 'success');
-                    
+
                     // --- Decode Global Volume (Index 50-51 -> char 100) ---
                     logWindow(payload, 100, 'Global Volume');
                     const gv_b1 = parseInt(payload.substring(100, 102), 16);
                     const gv_b2 = parseInt(payload.substring(102, 104), 16);
                     const globalVolume = (gv_b1 * 16) + gv_b2;
                     this.log(`Decoded Global Volume: ${globalVolume}`, 'success');
-            
+
                     // --- Decode FX Rec Level (Index 54-55 -> char 108) ---
                     logWindow(payload, 192, 'FX Rec Level');
                     const fx_b1 = payload.substring(192, 194);
                     const fx_b2 = payload.substring(194, 196);
                     const fxRecLevel = this.decodeDbValue(fx_b1, fx_b2);
                     this.log(`Decoded FX Rec Level: ${fxRecLevel}dB`, 'success');
-                    
+
                     // --- Decode Monitor Level (Index 56-57 -> char 112) ---
                     logWindow(payload, 212, 'Monitor Level');
                     const mon_b1 = payload.substring(212, 214);
                     const mon_b2 = payload.substring(214, 216);
                     const monitorLevel = this.decodeDbValue(mon_b1, mon_b2);
                     this.log(`Decoded Monitor Level: ${monitorLevel}dB`, 'success');
-                    
+
                     // --- Decode BT Rec Level (Index 62-63 -> char 124) ---
                     logWindow(payload, 272, 'BT Rec Level');
                     const bt_b1 = payload.substring(272, 274);
                     const bt_b2 = payload.substring(274, 276);
                     const btRecLevel = this.decodeDbValue(bt_b1, bt_b2);
                     this.log(`Decoded BT Rec Level: ${btRecLevel}dB`, 'success');
-            
+
                     return { globalVolume, inputLevel, fxRecLevel, monitorLevel, btRecLevel };
-            
+
                 } catch (error) {
                     this.log(`Failed to decode global settings: ${error.message}`, 'error');
                     return null;
                 }
             }
-            
+
             applyGlobalSettings(decodedData) {
                 if (!decodedData) return;
-            
+
                 const updateSlider = (paramName, value) => {
                     const slider = document.querySelector(`.slider[data-global-param="${paramName}"]`);
                     const display = slider ? slider.nextElementSibling : null;
@@ -12839,7 +13369,7 @@
                         this.log(`UI updated for ${paramName}.`, 'info');
                     }
                 };
-            
+
                 if (decodedData.globalVolume !== undefined) {
                     updateSlider('globalVolume', decodedData.globalVolume);
                 }
@@ -12856,13 +13386,13 @@
                     updateSlider('btRecLevel', decodedData.btRecLevel);
                 }
             }
-            
+
             encodeNameForSave(name) {
                 const PADDING_CHAR_CODE = "0000";
                 let encodedString = '';
                 // Use the character map from the existing file
                 const REVERSE_CHARACTER_MAP = Object.fromEntries(Object.entries(CHARACTER_MAP).map(([key, value]) => [value, key]));
-            
+
                 for (let i = 0; i < 10; i++) {
                     if (i >= name.length) {
                         encodedString += PADDING_CHAR_CODE;
@@ -12910,13 +13440,13 @@
                 this.lockingOverlay.style.display = 'flex';
                 this.isBruteForcing = true;
                 let wasSaved = false;
-            
+
                 try {
                     const presetName = this.presetNameInput.value;
                     const presetNumber = parseInt(this.presetNumberInput.value, 10);
                     const presetValue = presetNumber - 1;
                     let presetBytesHex;
-            
+
                     if (presetNumber >= 1 && presetNumber <= 50) {
                         const presetValueHex = presetValue.toString(16).padStart(2, '0');
                         const upperNibble = presetValueHex[0];
@@ -12925,7 +13455,7 @@
                     } else {
                         throw new Error('Invalid Preset Number. Must be between 1 and 50.');
                     }
-            
+
                     const encodedNameHex = this.encodeNameForSave(presetName);
                     const payloadTemplate = "0001000001030101040a{PRESET_BYTES}000000000000{ENCODED_NAME}000000000000";
                     let finalPayload = payloadTemplate.replace('{ENCODED_NAME}', encodedNameHex);
@@ -12958,7 +13488,7 @@
                     if (!wasSaved) {
                         this.log('Save failed: No valid checksum found.', 'error');
                     }
-            
+
                 } catch (error) {
                     this.log(`An error occurred during save: ${error.message}`, 'error');
                 } finally {
@@ -13011,9 +13541,9 @@
 
                 if (this.isSyncing && hexString.startsWith('8080F0') && hexString.endsWith('F7')) {
                     const TERMINATOR_PACKET = "8080F0030601050104000200000000F7";
-                    
+
                     clearTimeout(this.nameSyncTimeoutId);
-                
+
                     if (this.connectionType === 'usb') {
                        this.log(`✅ Processing 1 USB SysEx data packet.`, 'info');
                        this.dumpPackets.push(hexString);
@@ -13025,7 +13555,7 @@
                         this.dumpPackets.push(hexString);
                         this.log(`Received name packet ${this.dumpPackets.length}: ${hexString}`, 'received');
 
-                
+
                         this.nameSyncTimeoutId = setTimeout(() => {
                             if (this.isSyncing) {
                                 this.log(`Name sync timed out after packet ${this.dumpPackets.length}. Processing what was              received.`, 'info');
@@ -13035,7 +13565,7 @@
                     }
                     return;
                 }
-                
+
                 if (this.isWaitingForPresetDump && hexString.startsWith('8080F0') && hexString.endsWith('F7') && hexString.length > 50) {
                     this.dumpPackets.push(hexString);
                     if (this.dumpPackets.length === 5 || this.connectionType === 'usb') {
@@ -13056,14 +13586,14 @@
                         clearTimeout(this.syncTimeoutId);
                         this.syncTimeoutId = null;
                         this.isWaitingForPresetDump = false;
-                        
+
                         try {
                             const stateData = this.decodePresetStateAndOrder(this.dumpPackets[0]);
                             const effectData = this.decodeSelectedEffects(this.dumpPackets[1]);
                             const parameterData = this.decodeParameterValues(this.dumpPackets, effectData.selectedEffects);
-                            
+
                             const fullPresetData = { ...stateData, ...effectData, ...parameterData };
-                            
+
                             this.applyPresetState(fullPresetData);
                         } catch (error) {
                             this.log(`❌ Failed to decode preset state: ${error.message}`, 'error');
@@ -13085,13 +13615,13 @@
                                 overlay.querySelector('p:first-child').textContent = 'Trying to save preset...';
                             }
                             // --- END OF CHANGE ---
-                            
+
                             this.unlockPatchList();
                         }
                     }
                     return;
                 }
-                
+
                 // Flexible pattern matching: Search for key identifying bytes anywhere in the message
                 // This handles both USB and BLE formats which may have different status bytes at different positions
                 // Now also works with reassembled multi-packet USB responses
@@ -13106,7 +13636,7 @@
                         if (this.cloneNamePromiseResolve) this.cloneNamePromiseResolve();
                         return;
                     }
-                    
+
                     // USER IR SIGNATURE: "00010000050701020200"
                     // This 10-byte sequence uniquely identifies User IR name data
                     // It appears in the same position regardless of USB fragmentation
@@ -13136,23 +13666,23 @@
                     } catch (error) { /* Ignore parsing errors for stray messages */ }
                     return;
                 }
-                
+
                 this.log(`Received (unhandled): ${hexString.match(/.{1,2}/g).join(' ')}`, 'received');
             }
-            
+
             syncPresetNames(isAutomated = false) {
                 return new Promise(async (resolve, reject) => {
                     if (!this.isConnected || this.isSyncing) {
                         this.log('Sync request ignored: Not connected or already syncing.', 'info');
                         return isAutomated ? reject(new Error('Already syncing')) : resolve();
                     }
-            
+
                     this.log('Starting preset name sync (using terminator packet)...', 'info');
                     this.isSyncing = true;
                     this.dumpPackets = [];
                     this.syncPresetNamesBtn.disabled = true;
                     this.syncPresetNamesBtn.textContent = 'Syncing...';
-            
+
                     // Clear any previous timer and set a single, overall timeout for the entire operation.
                     clearTimeout(this.nameSyncTimeoutId);
                     this.nameSyncTimeoutId = setTimeout(() => {
@@ -13170,10 +13700,10 @@
                             }
                         }
                     }, 10000); // 10-second overall timeout.
-            
+
                     // This promise will be resolved when processAndDisplayDump is called successfully.
                     this.presetNamesPromiseResolve = resolve;
-            
+
                     await this.writeCommand('8080F0000E00010000000201020400F7');
                 });
             }
@@ -13183,7 +13713,7 @@
                 this.syncPresetNamesBtn.disabled = false;
                 this.syncPresetNamesBtn.textContent = 'Sync Preset Names';
                 this.log('All SysEx name packets received. Processing...', 'info');
-            
+
                 try {
                     const allNames = this.dumpPackets.flatMap(packet => this.parsePacketForNames(packet.slice(6, -2)));
                     if (allNames.length < 100) {
@@ -13192,7 +13722,7 @@
                     }
                     this.log(`✅ Successfully decoded ${allNames.length} preset names.`, 'info');
                     this.populatePatchLists(allNames);
-            
+
                     // This is the crucial change:
                     // Instead of updating the UI immediately, we now ONLY ask for the current preset number.
                     // The rest of the sync process will be triggered by the response to this command.
@@ -13200,12 +13730,12 @@
                     this.isWaitingForPresetNumber = true;
                     this.writeCommand('8080F0000700010000000201020403F7');
                     if (this.presetNamesPromiseResolve) this.presetNamesPromiseResolve();
-            
+
                 } catch (error) {
                     this.log(`Error parsing preset names: ${error.message}`, 'error');
                 }
             }
-            
+
             async syncCurrentPresetState() {
                 if (!this.isConnected || this.isSyncingState) {
                     this.log('Cannot sync state, not connected or already syncing.', 'error');
@@ -13216,14 +13746,14 @@
                     clearTimeout(this.syncTimeoutId);
                 }
                 this.log('Requesting current preset state...', 'info');
-                
+
                 // Ensure other sync processes are stopped
                 this.isWaitingForPresetDump = true;
                 this.isSyncing = false; 
-            
+
                 this.dumpPackets = [];
                 await this.writeCommand('8080F0000900010000000201020401F7');
-            
+
                 this.syncTimeoutId = setTimeout(() => {
                     if (this.isWaitingForPresetDump) {
                         this.isWaitingForPresetDump = false;
@@ -13237,19 +13767,19 @@
                 return new Promise(async (resolve, reject) => {
                     if (!this.isConnected) return isAutomated ? reject(new Error('Not connected')) : resolve();
                     this.log('Requesting User IR names...', 'info');
-            
+
                     const timeout = setTimeout(() => {
                         this.irNamePromiseResolve = null;
                         if (isAutomated) reject(new Error('User IR name sync timed out.'));
                         else resolve();
                     }, 3000);
-            
+
                     this.irNamePromiseResolve = () => {
                         clearTimeout(timeout);
                         this.irNamePromiseResolve = null;
                         resolve();
                     };
-            
+
                     await this.writeCommand('8080F0020900010000000201020200F7');
                 });
             }
@@ -13258,19 +13788,19 @@
                 return new Promise(async (resolve, reject) => {
                     if (!this.isConnected) return isAutomated ? reject(new Error('Not connected')) : resolve();
                     this.log('Requesting Clone Amp names...', 'info');
-            
+
                     const timeout = setTimeout(() => {
                         this.cloneNamePromiseResolve = null;
                         if (isAutomated) reject(new Error('Clone Amp name sync timed out.'));
                         else resolve();
                     }, 3000);
-            
+
                     this.cloneNamePromiseResolve = () => {
                         clearTimeout(timeout);
                         this.cloneNamePromiseResolve = null;
                         resolve();
                     };
-            
+
                     await this.writeCommand('8080F0030500010000000201020204F7');
                 });
             }
@@ -13354,7 +13884,7 @@
                 // This function processes the FIRST dump message for states, order, and volume.
                 const bytes = hexString.match(/.{1,2}/g);
                 if (!bytes) throw new Error("Failed to parse hex string into bytes.");
-            
+
                 const payload = bytes.slice(5, -1);
                 const payloadString = payload.join('');
 
@@ -13363,7 +13893,7 @@
                     const volumeMarker = "01020000040000";
                     const markerStringIndex = payloadString.indexOf(volumeMarker);
                     if (markerStringIndex === -1) throw new Error("Volume marker not found.");
-                    
+
                     const tens_byte_index = (markerStringIndex + volumeMarker.length) / 2;
                     const ones_byte_index = tens_byte_index + 1;
                     const tens_byte_hex = payload[tens_byte_index];
@@ -13374,7 +13904,7 @@
                     this.log(`Could not decode preset volume: ${error.message}`, 'error');
                     presetVolume = 75; 
                 }
-                
+
                 const chainMarker = "0A000000";
                 const chainStartIndex = payloadString.lastIndexOf(chainMarker);
                 if (chainStartIndex === -1) {
@@ -13423,11 +13953,11 @@
                 }
                 if (!nrFoundInList && chainIds.length < 9) chainIds.unshift(0);
                 const chainOrder = chainIds.map(id => MODULES[id]);
-                
+
                 this.log(`Decoded AmpMode: ${isCloneMode ? 'Clone' : 'Normal'}`, 'info');
                 this.log(`Decoded States: ${JSON.stringify(moduleStates)}`, 'info');
                 this.log(`Decoded Order: ${chainOrder.join(', ')}`, 'info');
-                
+
                 return {
                     ampMode: isCloneMode ? 'Clone' : 'Normal',
                     states: moduleStates,
@@ -13441,9 +13971,9 @@
                     this.log(`Invalid preset index received: ${index}`, 'error');
                     return;
                 }
-            
+
                 let targetTab, baseName, presetNumber;
-            
+
                 if (index < 50) { // User preset (0-49)
                     targetTab = this.userTabBtn;
                     presetNumber = index + 1;
@@ -13453,13 +13983,13 @@
                     presetNumber = index - 50 + 1;
                     baseName = `F${String(presetNumber).padStart(2, '0')}`;
                 }
-            
+
                 if (!targetTab.classList.contains('active')) {
                     targetTab.click(); // Switch to the correct tab if needed
                 }
-            
+
                 const presetElement = document.querySelector(`.patch-item[data-base-name="${baseName}"]`);
-            
+
                 if (presetElement) {
                     this.log(`Device is on preset ${baseName}. Syncing UI.`, 'info');
                     // Update UI without sending a command back to the device
@@ -13507,27 +14037,27 @@
 
             decodeParameterValues(dumpPackets, selectedEffects) {
                 const decodedParams = {};
-            
+
                 selectedEffects[0] = 1; //so we start at NR module that only has 1 fx slot
-            
+
                 for (const moduleIdStr in selectedEffects) {
                     const moduleId = parseInt(moduleIdStr, 10);
                     const fxId = selectedEffects[moduleId];
                     const effectDef = this.definitions.effectLibrary[fxId];
-            
+
                     if (!effectDef || !effectDef.alg) continue;
-            
+
                     decodedParams[moduleId] = {};
-            
+
                     effectDef.alg.forEach(param => {
                         const algId = param.algId;
                         const mapKey = `${moduleId}_${algId}`;
                         const location = this.ALGID_LOCATION_MAP[mapKey];
-            
+
                         if (location) {
                             const packet = dumpPackets[location.p];
                             const bytes = packet ? packet.match(/.{1,2}/g) : null;
-            
+
                             if (bytes && bytes.length >= location.o + 6) {
                                 const hexBlock = bytes.slice(location.o, location.o + 6).join('');
                                 const finalValue = this.decodeParameterValue(hexBlock);
@@ -13548,16 +14078,16 @@
             applyPresetState(decodedData) {
                 this.log('Applying decoded state to UI...', 'info');
                 this.isApplyingState = true; // Set flag to TRUE before making changes
-                
+
                 try {
                     const originalWriteCommand = this.writeCommand;
                     this.writeCommand = () => {
                         return Promise.resolve();
                     };
-                    
+
                     try {
                         const cloneModeToggle = document.getElementById('amp-clone-mode');
-                        
+
                         if (decodedData.ampMode) {
                             const shouldCloneBeActive = decodedData.ampMode === 'Clone';
                             const isCloneActiveInUI = cloneModeToggle.classList.contains('on');
@@ -13566,21 +14096,23 @@
                             }
                             this.updateIRModuleForCloneMode(shouldCloneBeActive);
                         }
-                        
+
                         if (decodedData.states) {
                             Object.entries(decodedData.states).forEach(([moduleName, isOn]) => {
                                 const moduleDef = this.definitions.modules.find(m => m.name === moduleName);
                                 if (!moduleDef) return;
-                                
+
                                 const moduleId = moduleDef.moduleId;
-                                const enableToggle = document.getElementById(`module-enable-${moduleId}`);
+                                // Clone (9) shares enable toggle with AMP (3)
+                                const toggleId = (moduleId === 9) ? 3 : moduleId;
+                                const enableToggle = document.getElementById(`module-enable-${toggleId}`);
                                 if (enableToggle) {
                                     enableToggle.classList.toggle('on', isOn);
-                                    this.updateModuleStatus(moduleId);
+                                    this.updateModuleStatus(toggleId);
                                 }
                             });
                         }
-                        
+
                         if (decodedData.presetVolume !== undefined) {
                             const volumeSlider = document.querySelector('.patch-volume-module .slider');
                             const volumeValueDisplay = document.querySelector('.patch-volume-module .slider-value');
@@ -13590,7 +14122,7 @@
                                 this.updateSliderProgress(volumeSlider);
                             }
                         }          
-                        
+
                         if (decodedData.selectedEffects) {
                             Object.entries(decodedData.selectedEffects).forEach(([moduleIdStr, fxId]) => {
                                 const decodedModuleId = parseInt(moduleIdStr, 10);
@@ -13603,9 +14135,9 @@
                                 } else if (decodedModuleId === 9) {
                                     this.ampModeFxId9 = fxId;
                                 }
-                
+
                                 let targetModuleId = (decodedModuleId === 9 && cloneModeToggle.classList.contains('on')) || (decodedModuleId === 3 && !cloneModeToggle.classList.contains('on')) ? 3 : decodedModuleId;
-            
+
                                 if (decodedModuleId === 9 && !cloneModeToggle.classList.contains('on')) return;
                                 if (decodedModuleId === 3 && cloneModeToggle.classList.contains('on')) return;
 
@@ -13617,10 +14149,13 @@
                                     } else {
                                         this.log(`Cannot set M${targetModuleId} to fxId ${fxId}: option not found.`, 'error');
                                     }
+                                } else {
+                                    // Module without a select element (e.g., noise gate) - just log that it's been set
+                                    this.log(`Effect for M${targetModuleId} set to fxId ${fxId} (no UI dropdown).`, 'info');
                                 }
                             });
                         }
-                        
+
                         if (decodedData.order) {
                             const container = document.querySelector('.chain-flow');
                             const newOrderFragment = document.createDocumentFragment();
@@ -13703,7 +14238,7 @@
                     }
                 } finally {
                     this.isApplyingState = false; // Set flag to FALSE when finished
-                
+
                     // If this was the initial sync, perform one final check for modification status
                     // after the UI has been fully populated.
                     if (this.isInitialSyncing) {
@@ -13713,16 +14248,16 @@
                         setTimeout(async () => {
                             await this.writeCommand('8080F0010500010000000201020405F7');
                             this.isInitialSyncing = false; // The sequence is now TRULY complete.
-                            
+
                             const overlay = document.getElementById('lockingOverlay');
                             overlay.style.display = 'none'; // Hide the sync overlay
                             overlay.querySelector('p:first-child').textContent = 'Trying to save preset...';
                             overlay.querySelector('p:last-child').textContent = 'This could take up to 2 minutes!';
-                
+
                             this.log('✅ Initial auto-sync sequence complete.', 'info');
                         }, 150); // A small delay is sufficient.
                     }
-                
+
                     this.log('✅ UI sync complete. Command sending re-enabled.', 'info');
                 }
             }
@@ -13731,7 +14266,7 @@
         updateUIAfterSave(presetNumber, newName) {
             const baseName = `P${String(presetNumber).padStart(2, '0')}`;
             const newDisplayText = `${baseName}: ${newName}`;
-        
+
             // 1. Update the in-memory data array for consistency
             const dataIndex = this.userPatchesData.findIndex(p => p.baseName === baseName);
             if (dataIndex !== -1) {
@@ -13739,7 +14274,7 @@
                 this.userPatchesData[dataIndex].displayText = newDisplayText;
                 this.log('In-memory patch data updated.', 'info');
             }
-        
+
             // 2. Update the visual list item in the sidebar
             const patchItem = document.querySelector(`.patch-item[data-base-name="${baseName}"]`);
             if (patchItem) {
@@ -13747,7 +14282,7 @@
                 patchItem.title = newDisplayText;
                 this.log(`UI preset list updated for ${baseName}.`, 'info');
             }
-        
+
             // 3. Check if the active preset needs to change
             const currentlySelectedBaseName = document.getElementById('patchNumber').textContent;
             if (baseName !== currentlySelectedBaseName) {
@@ -13767,11 +14302,11 @@
             parsePacketForNames(packetHex) {
                 const foundNames = [];
                 const NAME_HEX_LENGTH = 40; // 20 bytes
-            
+
                 let offset = 0;
                 while ((offset + NAME_HEX_LENGTH) <= packetHex.length) {
                     const windowHex = packetHex.substring(offset, offset + NAME_HEX_LENGTH);
-                    
+
                     if (this.isValidNameBlock(windowHex)) {
                         const decoded = this.decodeName(windowHex);
                         // Add the name only if it's not just padding/empty
@@ -13869,7 +14404,7 @@
                     e.preventDefault();
                     const afterElement = this.getDragAfterElement(container, e.clientX);
                     const connector = draggedElement.nextElementSibling;
-                    
+
                     if (afterElement == null) {
                         container.insertBefore(draggedElement, document.getElementById('chain-terminator'));
                     } else {
@@ -13879,7 +14414,7 @@
                        container.insertBefore(connector, draggedElement.nextElementSibling);
                     }
                 });
-                
+
                 container.addEventListener('dragend', () => {
                     if (draggedElement) {
                         draggedElement.classList.remove('dragging');
@@ -13926,7 +14461,7 @@
                 const after = chainItems.slice(fixedBlockIndex + 1)
                                         .filter(el => el.classList.contains('chain-module') && el.dataset.moduleId)
                                         .map(el => this.getModuleNameById(el.dataset.moduleId));
-                
+
                 const orderKey = [
                     ...before,
                     'DRV', 'AMP', 'IR', 'EQ',
