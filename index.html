@@ -13667,7 +13667,134 @@
                     return;
                 }
 
+                if (this.parseSysExMessage(hexString)) return;
+
                 this.log(`Received (unhandled): ${hexString.match(/.{1,2}/g).join(' ')}`, 'received');
+            }
+
+            parseSysExMessage(hexString) {
+                try {
+                    if (!hexString.startsWith('8080F0') || !hexString.endsWith('F7')) return false;
+                    if (hexString.length < 30) return false;
+
+                    const payload = hexString.substring(22, hexString.length - 2);
+                    if (payload.length < 8) return false;
+
+                    const prefix = payload.substring(0, 4);
+                    const command = payload.substring(4, 8);
+
+                    if (prefix !== '0101' && prefix !== '0102') return false;
+
+                    // Decode a nibble-expanded byte (4 hex chars → 1 value) at given payload char offset
+                    const decNE = (offset) => {
+                        const hi = parseInt(payload.substring(offset, offset + 2), 16);
+                        const lo = parseInt(payload.substring(offset + 2, offset + 4), 16);
+                        return (hi << 4) | lo;
+                    };
+
+                    const modName = (id) => MODULES[String(id)] || `M${id}`;
+
+                    switch (command) {
+                        case '0409': { // Module State (On/Off) / Amp Mode
+                            const moduleId = decNE(8);
+                            const value = decNE(24);
+                            if (moduleId === 9) {
+                                this.log(`📡 Amp Mode → ${value ? 'Clone' : 'Factory'}`, 'received');
+                            } else {
+                                this.log(`📡 ${modName(moduleId)} → ${value ? 'ON' : 'OFF'}`, 'received');
+                            }
+                            return true;
+                        }
+                        case '0407': { // Effect Type Selection
+                            const moduleId = decNE(8);
+                            if (!this.effectFingerprintToName && this.commands?.effectTypes) {
+                                this.effectFingerprintToName = {};
+                                for (const modId in this.commands.effectTypes) {
+                                    for (const fxId in this.commands.effectTypes[modId]) {
+                                        const hex = this.commands.effectTypes[modId][fxId].toUpperCase();
+                                        const pl = hex.substring(22, hex.length - 2);
+                                        // Long format (0E): tail at offset 40; Short format (0A): tail at offset 24
+                                        const tail = pl.length > 40 ? pl.substring(40) : pl.substring(24);
+                                        const mod = pl.substring(8, 12);
+                                        this.effectFingerprintToName[mod + ':' + tail] = this.definitions?.effectLibrary?.[fxId]?.name || `FX${fxId}`;
+                                    }
+                                }
+                            }
+                            const recvTail = payload.length > 40 ? payload.substring(40) : payload.substring(24);
+                            const recvMod = payload.substring(8, 12);
+                            const effectName = this.effectFingerprintToName?.[recvMod + ':' + recvTail.toUpperCase()];
+                            this.log(`📡 Effect: ${modName(moduleId)} → ${effectName || 'unknown'}`, 'received');                       
+                            return true;
+                        }
+                        case '0408': { // Parameter Value
+                            const moduleId = decNE(8);
+                            const algId = decNE(24);
+                            let msg = `📡 Param: ${modName(moduleId)} AlgID ${algId}`;
+                            if (payload.length >= 56) {
+                                const valueHex = payload.substring(44, 56);
+                                const value = this.eqReverseLookup?.[valueHex];
+                                if (value !== undefined) {
+                                    msg += ` = ${value}`;
+                                } else {
+                                    msg += ` (raw: ${valueHex})`;
+                                }
+                            }
+                            this.log(msg, 'received');
+                            return true;
+                        }
+                        case '0404': { // Chain Order
+                            const chain = [];
+                            for (let i = 0; i < 9; i++) {
+                                const offset = 8 + i * 4;
+                                if (offset + 4 <= payload.length) {
+                                    chain.push(modName(decNE(offset)));
+                                }
+                            }
+                            this.log(`📡 Chain: ${chain.join(' → ')}`, 'received');
+                            return true;
+                        }
+                        case '0403': { // Preset Select
+                            const idx = decNE(8);
+                            const label = idx < 50
+                                ? `P${String(idx + 1).padStart(2, '0')}`
+                                : `F${String(idx - 49).padStart(2, '0')}`;
+                            this.log(`📡 Preset: ${label} (index ${idx})`, 'received');
+                            return true;
+                        }
+                        case '0402': { // Preset Volume
+                            const value = decNE(24);
+                            this.log(`📡 Preset Volume: ${value}`, 'received');
+                            return true;
+                        }
+                        case '0101': { // Global Setting
+                            const group = decNE(8);
+                            const sub = decNE(12);
+                            const GLOBAL_PARAMS = {
+                                '2_2': 'Global Volume',
+                                '1_3': 'Input Level',
+                                '1_4': 'FX Rec Level',
+                                '2_4': 'Monitor Level',
+                                '5_4': 'BT Rec Level'
+                            };
+                            const paramName = GLOBAL_PARAMS[`${group}_${sub}`] || `Global ${group}:${sub}`;
+                            const value = this.decodeDbValue(payload.substring(24, 26), payload.substring(26, 28));
+                            const unit = (group === 2 && sub === 2) ? '' : 'dB';
+                            this.log(`📡 ${paramName}: ${value}${unit}`, 'received');
+                            return true;
+                        }
+                        default: {
+                            const formatted = hexString.match(/.{1,2}/g).join(' ');
+                            const parts = [`prefix=${prefix}`, `command=${command}`];
+                            if (payload.length >= 12) parts.push(`moduleId=${decNE(8)}`);
+                            this.log(`📡 Undecoded SysEx [${parts.join(', ')}]: ${formatted}`, 'received');
+                            return false;
+                        }
+                    }
+                } catch (e) {
+                    const formatted = hexString.match(/.{1,2}/g).join(' ');
+                    this.log(`📡 SysEx decode error: ${e.message} | Raw: ${formatted}`, 'received');
+                    return false;
+                }
             }
 
             syncPresetNames(isAutomated = false) {
