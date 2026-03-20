@@ -13672,6 +13672,18 @@
                 this.log(`Received (unhandled): ${hexString.match(/.{1,2}/g).join(' ')}`, 'received');
             }
 
+            // Suppress device commands while updating UI from a received message
+            withUISuppression(fn) {
+                const origWrite = this.writeCommand;
+                const origFlag = this.isApplyingState;
+                this.writeCommand = () => Promise.resolve();
+                this.isApplyingState = true;
+                try { fn(); } finally {
+                    this.writeCommand = origWrite;
+                    this.isApplyingState = origFlag;
+                }
+            }
+
             parseSysExMessage(hexString) {
                 try {
                     if (!hexString.startsWith('8080F0') || !hexString.endsWith('F7')) return false;
@@ -13694,63 +13706,171 @@
 
                     const modName = (id) => MODULES[String(id)] || `M${id}`;
 
+                    // Build fingerprint-to-fxId map (once) alongside the name map
+                    if (!this.effectFingerprintToFxId && this.commands?.effectTypes) {
+                        this.effectFingerprintToFxId = {};
+                        this.effectFingerprintToName = {};
+                        for (const modId in this.commands.effectTypes) {
+                            for (const fxId in this.commands.effectTypes[modId]) {
+                                const hex = this.commands.effectTypes[modId][fxId].toUpperCase();
+                                const pl = hex.substring(22, hex.length - 2);
+                                const tail = pl.length > 40 ? pl.substring(40) : pl.substring(24);
+                                const mod = pl.substring(8, 12);
+                                const key = mod + ':' + tail;
+                                this.effectFingerprintToName[key] = this.definitions?.effectLibrary?.[fxId]?.name || `FX${fxId}`;
+                                this.effectFingerprintToFxId[key] = parseInt(fxId, 10);
+                            }
+                        }
+                    }
+
                     switch (command) {
                         case '0409': { // Module State (On/Off) / Amp Mode
                             const moduleId = decNE(8);
                             const value = decNE(24);
                             if (moduleId === 9) {
                                 this.log(`📡 Amp Mode → ${value ? 'Clone' : 'Factory'}`, 'received');
+                                this.withUISuppression(() => {
+                                    const cloneModeToggle = document.getElementById('amp-clone-mode');
+                                    const shouldBeClone = value === 1;
+                                    const isClone = cloneModeToggle.classList.contains('on');
+                                    if (shouldBeClone !== isClone) {
+                                        cloneModeToggle.click();
+                                    }
+                                    this.updateIRModuleForCloneMode(shouldBeClone);
+                                });
                             } else {
                                 this.log(`📡 ${modName(moduleId)} → ${value ? 'ON' : 'OFF'}`, 'received');
+                                this.withUISuppression(() => {
+                                    const toggleId = moduleId;
+                                    const enableToggle = document.getElementById(`module-enable-${toggleId}`);
+                                    if (enableToggle) {
+                                        enableToggle.classList.toggle('on', value === 1);
+                                        this.updateModuleStatus(toggleId);
+                                    }
+                                });
                             }
                             return true;
                         }
                         case '0407': { // Effect Type Selection
                             const moduleId = decNE(8);
-                            if (!this.effectFingerprintToName && this.commands?.effectTypes) {
-                                this.effectFingerprintToName = {};
-                                for (const modId in this.commands.effectTypes) {
-                                    for (const fxId in this.commands.effectTypes[modId]) {
-                                        const hex = this.commands.effectTypes[modId][fxId].toUpperCase();
-                                        const pl = hex.substring(22, hex.length - 2);
-                                        // Long format (0E): tail at offset 40; Short format (0A): tail at offset 24
-                                        const tail = pl.length > 40 ? pl.substring(40) : pl.substring(24);
-                                        const mod = pl.substring(8, 12);
-                                        this.effectFingerprintToName[mod + ':' + tail] = this.definitions?.effectLibrary?.[fxId]?.name || `FX${fxId}`;
-                                    }
-                                }
-                            }
                             const recvTail = payload.length > 40 ? payload.substring(40) : payload.substring(24);
                             const recvMod = payload.substring(8, 12);
-                            const effectName = this.effectFingerprintToName?.[recvMod + ':' + recvTail.toUpperCase()];
-                            this.log(`📡 Effect: ${modName(moduleId)} → ${effectName || 'unknown'}`, 'received');                       
+                            const fpKey = recvMod + ':' + recvTail.toUpperCase();
+                            const effectName = this.effectFingerprintToName?.[fpKey];
+                            const fxId = this.effectFingerprintToFxId?.[fpKey];
+                            this.log(`📡 Effect: ${modName(moduleId)} → ${effectName || 'unknown'}`, 'received');
+
+                            if (fxId !== undefined) {
+                                this.withUISuppression(() => {
+                                    const cloneModeToggle = document.getElementById('amp-clone-mode');
+                                    const isCloneActive = cloneModeToggle.classList.contains('on');
+
+                                    if (moduleId === 3) this.ampModeFxId3 = fxId;
+                                    if (moduleId === 9) this.ampModeFxId9 = fxId;
+
+                                    // Map module 9 to dropdown 3 when clone is active; skip inactive mode
+                                    let targetId = moduleId;
+                                    if (moduleId === 9 && isCloneActive) targetId = 3;
+                                    else if (moduleId === 9 && !isCloneActive) return;
+                                    else if (moduleId === 3 && isCloneActive) return;
+
+                                    const selectEl = document.getElementById(`module-type-${targetId}`);
+                                    if (selectEl && [...selectEl.options].some(opt => opt.value == fxId)) {
+                                        selectEl.value = fxId;
+                                        selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+                                    }
+                                });
+                            }
                             return true;
                         }
                         case '0408': { // Parameter Value
                             const moduleId = decNE(8);
                             const algId = decNE(24);
+                            let decodedValue;
                             let msg = `📡 Param: ${modName(moduleId)} AlgID ${algId}`;
                             if (payload.length >= 56) {
                                 const valueHex = payload.substring(44, 56);
-                                const value = this.eqReverseLookup?.[valueHex];
-                                if (value !== undefined) {
-                                    msg += ` = ${value}`;
+                                decodedValue = this.eqReverseLookup?.[valueHex];
+                                if (decodedValue !== undefined) {
+                                    msg += ` = ${decodedValue}`;
                                 } else {
                                     msg += ` (raw: ${valueHex})`;
                                 }
                             }
                             this.log(msg, 'received');
+
+                            if (decodedValue !== undefined) {
+                                this.withUISuppression(() => {
+                                    const isCloneActive = document.getElementById('amp-clone-mode').classList.contains('on');
+                                    if (moduleId === 3 && isCloneActive) return;
+                                    if (moduleId === 9 && !isCloneActive) return;
+                                    const uiModuleId = (moduleId === 9) ? 3 : moduleId;
+
+                                    const control = document.querySelector(`[data-module-id="${uiModuleId}"][data-alg-id="${algId}"]`);
+                                    if (control) {
+                                        if (control.classList.contains('slider')) {
+                                            control.value = decodedValue;
+                                            const valueDisplay = control.nextElementSibling;
+                                            if (valueDisplay) valueDisplay.textContent = decodedValue;
+                                            this.updateSliderProgress(control);
+                                        } else if (control.classList.contains('toggle-switch')) {
+                                            control.classList.toggle('on', decodedValue === 1);
+                                        } else if (control.tagName === 'SELECT') {
+                                            control.value = decodedValue;
+                                        }
+                                    }
+                                });
+                            }
                             return true;
                         }
                         case '0404': { // Chain Order
-                            const chain = [];
+                            const chainIds = [];
                             for (let i = 0; i < 9; i++) {
                                 const offset = 8 + i * 4;
                                 if (offset + 4 <= payload.length) {
-                                    chain.push(modName(decNE(offset)));
+                                    chainIds.push(decNE(offset));
                                 }
                             }
-                            this.log(`📡 Chain: ${chain.join(' → ')}`, 'received');
+                            const chainNames = chainIds.map(id => modName(id));
+                            this.log(`📡 Chain: ${chainNames.join(' → ')}`, 'received');
+
+                            this.withUISuppression(() => {
+                                const container = document.querySelector('.chain-flow');
+                                const fixedBlock = document.getElementById('fixed-chain-block');
+                                const fixedBlockConnector = fixedBlock.nextElementSibling;
+                                const moduleAndConnectorMap = new Map();
+                                document.querySelectorAll('.chain-module[draggable="true"]').forEach(el => {
+                                    const mName = this.getModuleNameById(el.dataset.moduleId);
+                                    moduleAndConnectorMap.set(mName, { module: el, connector: el.nextElementSibling });
+                                });
+                                moduleAndConnectorMap.forEach(({ module, connector }) => {
+                                    module.remove();
+                                    if (connector) connector.remove();
+                                });
+                                fixedBlock.remove();
+                                if (fixedBlockConnector?.classList.contains('chain-connector')) {
+                                    fixedBlockConnector.remove();
+                                }
+                                const fragment = document.createDocumentFragment();
+                                let fixedBlockPlaced = false;
+                                chainNames.forEach(mName => {
+                                    if (['DRV', 'AMP', 'IR', 'EQ'].includes(mName) && !fixedBlockPlaced) {
+                                        fragment.appendChild(fixedBlock);
+                                        if (fixedBlockConnector) fragment.appendChild(fixedBlockConnector);
+                                        fixedBlockPlaced = true;
+                                    } else if (moduleAndConnectorMap.has(mName)) {
+                                        const { module, connector } = moduleAndConnectorMap.get(mName);
+                                        fragment.appendChild(module);
+                                        if (connector) fragment.appendChild(connector);
+                                    }
+                                });
+                                container.insertBefore(fragment, document.getElementById('chain-terminator'));
+                                container.querySelectorAll('.chain-connector').forEach(conn => {
+                                    const next = conn.nextElementSibling;
+                                    conn.classList.toggle('is-last-connector',
+                                        !(next && (next.classList.contains('chain-module') || next.id === 'fixed-chain-block')));
+                                });
+                            });
                             return true;
                         }
                         case '0403': { // Preset Select
@@ -13759,27 +13879,52 @@
                                 ? `P${String(idx + 1).padStart(2, '0')}`
                                 : `F${String(idx - 49).padStart(2, '0')}`;
                             this.log(`📡 Preset: ${label} (index ${idx})`, 'received');
+
+                            this.selectPresetByIndex(idx);
                             return true;
                         }
                         case '0402': { // Preset Volume
                             const value = decNE(24);
                             this.log(`📡 Preset Volume: ${value}`, 'received');
+
+                            this.withUISuppression(() => {
+                                const volumeSlider = document.querySelector('.patch-volume-module .slider');
+                                const volumeDisplay = document.querySelector('.patch-volume-module .slider-value');
+                                if (volumeSlider && volumeDisplay) {
+                                    volumeSlider.value = value;
+                                    volumeDisplay.textContent = value;
+                                    this.updateSliderProgress(volumeSlider);
+                                }
+                            });
                             return true;
                         }
                         case '0101': { // Global Setting
                             const group = decNE(8);
                             const sub = decNE(12);
                             const GLOBAL_PARAMS = {
-                                '2_2': 'Global Volume',
-                                '1_3': 'Input Level',
-                                '1_4': 'FX Rec Level',
-                                '2_4': 'Monitor Level',
-                                '5_4': 'BT Rec Level'
+                                '2_2': { label: 'Global Volume', slider: 'globalVolume' },
+                                '1_3': { label: 'Input Level', slider: 'inputLevel' },
+                                '1_4': { label: 'FX Rec Level', slider: 'fxRecLevel' },
+                                '2_4': { label: 'Monitor Level', slider: 'monitorLevel' },
+                                '5_4': { label: 'BT Rec Level', slider: 'btRecLevel' }
                             };
-                            const paramName = GLOBAL_PARAMS[`${group}_${sub}`] || `Global ${group}:${sub}`;
+                            const paramInfo = GLOBAL_PARAMS[`${group}_${sub}`];
+                            const paramLabel = paramInfo?.label || `Global ${group}:${sub}`;
                             const value = this.decodeDbValue(payload.substring(24, 26), payload.substring(26, 28));
                             const unit = (group === 2 && sub === 2) ? '' : 'dB';
-                            this.log(`📡 ${paramName}: ${value}${unit}`, 'received');
+                            this.log(`📡 ${paramLabel}: ${value}${unit}`, 'received');
+
+                            if (paramInfo?.slider) {
+                                this.withUISuppression(() => {
+                                    const slider = document.querySelector(`.slider[data-global-param="${paramInfo.slider}"]`);
+                                    const display = slider ? slider.nextElementSibling : null;
+                                    if (slider && display) {
+                                        slider.value = value;
+                                        display.textContent = slider.min < 0 ? `${value}dB` : value;
+                                        this.updateSliderProgress(slider);
+                                    }
+                                });
+                            }
                             return true;
                         }
                         default: {
