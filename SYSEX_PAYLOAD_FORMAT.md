@@ -240,11 +240,12 @@ These are sent TO the device to request data. They use a different command prefi
 
 ### 3.5 `0301` — Response/ACK Commands (from Device)
 
-| Full SysEx Message                                    | Meaning                    |
-|-------------------------------------------------------|----------------------------|
-| `8080F00B02000100000003010400080000F7`                | Success ACK                |
-| `8080F0070A000100000003010204050001F7`                | Preset Modified notification|
-| `8080F0070D000100000003010204050000F7`                | Preset Saved notification  |
+| Full SysEx Message                                    | Meaning                      |
+|-------------------------------------------------------|------------------------------|
+| `8080F00B02000100000003010400080000F7`                | Success ACK                  |
+| `8080F00B05000100000003010400080001F7`                | Fail NACK                    |
+| `8080F0070A000100000003010204050001F7`                | Preset Modified notification |
+| `8080F0070D000100000003010204050000F7`                | Preset Saved notification    |
 
 ---
 
