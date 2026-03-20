@@ -13689,6 +13689,16 @@
                     if (!hexString.startsWith('8080F0') || !hexString.endsWith('F7')) return false;
                     if (hexString.length < 30) return false;
 
+                    // ACK / NACK detection
+                    if (hexString === '8080F00B02000100000003010400080000F7') {
+                        this.log('📡 ACK', 'received');
+                        return true;
+                    }
+                    if (hexString === '8080F00B05000100000003010400080001F7') {
+                        this.log('📡 NACK', 'received');
+                        return true;
+                    }
+
                     const payload = hexString.substring(22, hexString.length - 2);
                     if (payload.length < 8) return false;
 
@@ -13912,6 +13922,7 @@
                             const group = decNE(8);
                             const sub = decNE(12);
                             const GLOBAL_PARAMS = {
+                                '1_2': { label: 'Screen Change', slider: null },
                                 '2_2': { label: 'Global Volume', slider: 'globalVolume' },
                                 '1_3': { label: 'Input Level', slider: 'inputLevel' },
                                 '1_4': { label: 'FX Rec Level', slider: 'fxRecLevel' },
@@ -13921,7 +13932,7 @@
                             const paramInfo = GLOBAL_PARAMS[`${group}_${sub}`];
                             const paramLabel = paramInfo?.label || `Global ${group}:${sub}`;
                             const value = this.decodeDbValue(payload.substring(24, 26), payload.substring(26, 28));
-                            const unit = (group === 2 && sub === 2) ? '' : 'dB';
+                            const unit = (sub === 2) ? '' : 'dB';
                             this.log(`📡 ${paramLabel}: ${value}${unit}`, 'received');
 
                             if (paramInfo?.slider) {
