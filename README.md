@@ -18,11 +18,10 @@ The latest version is always available directly here:
 
 ## **Features**
 
-* **Dual Connectivity:** Now supports **USB WebMIDI** (default) with a fallback to **Bluetooth**. (thanks to @hnikolov)
+* **Dual Connectivity:** Now supports **USB WebMIDI** (default) with a fallback to **Bluetooth**. USB MIDI support allows the editor to work in **Firefox** and other non-Chromium browsers. (thanks to @hnikolov)
 * **Dual Way Communication:** Now displaying changes made on the device (thanks to @hnikolov)
 * **Preset Export in JSON:** Easy way to import/export JSON based presets instead of the proprietary prst files. (thanks to @hnikolov)
-* **Expanded Compatibility:** USB MIDI support allows the editor to work in **Firefox** and other non-Chromium browsers.
-* **Instant Preset Saving:** Brute-forcing the CRC is gone! Saving now uses a precise **CRC-8 calculation** for instant, reliable preset writing.
+* **Instant Preset Saving:** Brute-forcing the CRC is gone! Saving now uses a precise **CRC-8 calculation** for instant, reliable preset writing. (thanks to @hnikolov)
 * **Real-Time Editing:** Tweak any parameter and hear the changes instantly on your device.
 * **Full Preset Management:** Easily browse, search, and load all 50 User and 50 Factory presets.  
 * **Visual Signal Chain:** See your entire effects chain at a glance. Simply click a module to edit its parameters.  
