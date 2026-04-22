@@ -307,16 +307,36 @@
 
         .module-status {
             position: absolute;
-            top: 5px;
-            right: 5px;
-            width: 8px;
-            height: 8px;
+            top: 4px;
+            right: 4px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: #333;
+            cursor: pointer;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+
+        /* for larger clickable area */
+        .module-status::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            bottom: -6px;
+            left: -6px;
+        }
+
+        .module-status:hover {
+            box-shadow: 0 0 6px rgba(255,255,255,0.3);
         }
 
         .module-status.on {
             background: #44ff44;
+        }
+
+        .module-status.on:hover {
+            box-shadow: 0 0 8px rgba(68,255,68,0.7);
         }
 
         .chain-connector {
@@ -11714,7 +11734,11 @@
                     this.advancedSettingsPanel.classList.toggle('visible');
                 });
                 this.moduleElements.forEach(module => {
-                    module.addEventListener('click', () => {
+                    module.addEventListener('click', event => {
+                        if (event.target.closest('.module-status')) {
+                            // Click was on the status indicator, so we ignore it here and let the status click handler manage it.
+                            return;
+                        }
                         this.selectModule(parseInt(module.dataset.moduleId, 10));
                     });
                 });
@@ -11856,6 +11880,18 @@
 
                 document.body.addEventListener('click', event => {
                     const target = event.target;
+                    if (target.classList.contains('module-status') && target.id.startsWith('module-status-')) {
+                        // This click is on the status indicator, so we handle the toggle for enabling/disabling the module here.
+                        event.preventDefault();
+                        event.stopPropagation();
+                        const moduleId = parseInt(target.id.split('-')[2], 10);
+                        const enableToggle = document.getElementById(`module-enable-${moduleId}`);
+                        if (enableToggle && !enableToggle.classList.contains('locked')) {
+                            enableToggle.classList.toggle('on');
+                            this.sendModuleState(moduleId, enableToggle.classList.contains('on'));
+                        }
+                        return;
+                    }
                     if (target.classList.contains('toggle-switch') && !target.id.startsWith('amp-clone-mode')) {
                         if (target.classList.contains('locked')) return;
                          if (target.id && target.id.startsWith('module-enable-')) {
