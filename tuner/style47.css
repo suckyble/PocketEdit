@@ -1,0 +1,295 @@
+body{margin:0;padding:0;background:#fff;color:#000;font-family:Arial,sans-serif;font-size:14px}
+div.logo{width:100%;}
+div.logo a{display:block;}
+div.left{margin: 22px 10px 5px 10px;float:left;width: 26%;overflow: hidden;}
+div.content{padding: 10px 10px 10px 10px;border: 1px solid #EEE;margin: 2px 10px 10px 0px;}
+div.right{padding: 0px 0px 0px 0px;overflow: hidden;margin: 0px 0px 0px 0px;}
+h1{margin: 0px 0px 10px 0px;color: #5F3FBC;    border-bottom: 1px solid #8268cc;}
+ul.menu{list-style-type:none;padding:0;margin: 8px 0 10px 0;border-top: 1px solid #000;border-bottom: 1px solid #000;border-left: 1px solid #ccc;border-right: 1px solid #ccc;}
+ul.menu li a{border-bottom: 1px solid #DBDBDB;border-top: 1px solid #DBDBDB;display: block;font-size: 16px;display: block;padding: 10px 1px 10px 6px;text-decoration:none;color:#222;background-color:#FAF8FA;}
+ul.menu li.current > a{ background-color:#C9BEE9; color: #000; font-weight: 600; }
+ul.menu li a:hover{ background-color: #beb1e2; border-bottom: 1px solid #999; border-top: 1px solid #999; color: #000; }
+ul.submenu {list-style-type:none;padding:0;}
+ul.submenu li a{ padding: 9px 1px 9px 30px; color:#5377A5; }
+ul.submenu li.current > a{ background-color:#FAF8FA; color: #5377A5; font-weight: 700; }
+.menu-heading { margin-left:10px; }
+div.all-wide{width:100%;max-width:1700px; margin-left:auto;margin-right:auto;}
+div.bottom{padding: 30px 0px 20px 0px; margin: 25px 0 0 0; border-top:1px solid #CCCCCC; display:table;    clear: both;width: 100%;}
+div.bottom p{text-align: center;font-size:15px; margin-bottom: 4px;}
+div.bottom a{text-decoration: none;}
+div.bottom_left{display:table-cell; vertical-align: bottom;padding-left: 20px;}
+div.bottom_right{display:table-cell; vertical-align: bottom;padding-right: 20px;}
+div.bottom_middle{display:table-cell; vertical-align: bottom;width: 100%;}
+.footer-search-box{margin-left: auto;margin-right: auto;width:80%;margin-bottom:25px; max-width:600px;}
+#tunerframe{width: 100%;max-width: 452px;margin-top:10px;margin-bottom:30px;min-height: 360px}
+.altern #tunerframe{max-width: 362px;}
+#tunerback{border: 1px solid #5F3FBC;margin-left: auto;margin-right: auto;margin-bottom:10px;min-height: 276px;max-width: 600px;background-color: #fff;cursor:pointer;}
+.tuneron{cursor: pointer; display: block; transition: all .2s; font-size: 24px; border: 1px solid #5F3FBC; color: #fff; background: #5F3FBC; text-decoration: none; border-radius: 8px; padding: 23px 32px; margin-left: auto; margin-right: auto; width: 302px;}
+.tuneron:active,.tuneron:hover{color:#fff;background:#0B8043;border:1px solid #0B8043}
+ul.player{padding-bottom:20px;padding-left: 0;}
+ul.player li {background: none;padding: 6px 0 3px 1px;list-style: none;font-size: 18px;}
+ol.instruction{padding-left: 20px;line-height:1.5}
+ol.instruction li {padding: 0px 0px 10px 2px;}
+.playbutton{ cursor:pointer; display:inline-block; width:28px; height:27px; margin-right:6px; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACkAAAAoCAMAAABU4iNhAAABMlBMVEVcvSBevSBfviFgviFhvyJkwSNmwiRowiVqwy9rxCZtxCZvxSdwxTFwxTxxxihzxyh0xyl1yCl3ySp4ySp5ySt6yit8yix8yyx9yyx+y0t+zCx+zC1/zC2CzU2FzjmIz0SL0FCN0VCN0VuO0VGO0keO0lGP0keQ0lyR0lyT012U1FOU1F2W1V2W1V6X1V6Z1l+Z1nSa1mCb12Cc2GCd12Gd2GCe2GGe2HWf2GGf2Hag2Hai2nej2nel226l23it3nuu33uv33uv35Cw35Gy4JGz4ZK04ZK14pO24pO34pO44pO445O445S545S645S65JS75JW85JW85ZW95ZW+5Za/5pbD56HI6a7M6q/O67rP67DW773Z8Mjd8crf8svl9dfn9tjv+OT1+/H2+/H3/PL///+SihPfAAABWUlEQVQ4jZ3U11bCQBSF4YM0AQU7KNhFBRti7CXYQSmJiTWK9bz/KzgB0TMhIbP8b/e35iKTNYAsQ5akEackSa6bCBDfsnG3Dr8aMhtPuBWXTaknxtxLGExOpESaQ6gLwVSqDrqgvP2/fML3YyE5b35jW2qVO+hE7aUdZTJJ22pKLCStOcl2yiR3wZstibLl6nVHaaVMcr/XBhLKLZ0kT3XQhml5KjFPFg20Ido6Jx/IooI2SFvj5B1ZVLgZoHHyc5IsCqj9tFUK03SpgdpHWyFwlluqoMRoy39wmhtiFVCitKVfOBXlK0MtQsu0ZCZiqQTVMG3xBx6ErRWhEqItNOF+qK1LqARpMw24F2zvAsoB2rgJdwM2ncO1n+sRP7b9dp1Bycc32u2z7RSKXWKdgOEBoZ4Be4RgL3s/VZFDPffm6532ukLvUeOdxyu3U9mJTYkvuY4w92qib8+006RNEtQfAAAAAElFTkSuQmCC'); background-size: contain; margin-bottom: -6px; background-repeat: no-repeat }
+.playing > .playbutton{background-image: url(/images/playinactive.png); cursor: default}
+.pausebutton{ display:inline-block; width:28px; height:27px; margin-right:6px; background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACkAAAAoCAAAAABGV4yPAAAAxElEQVQ4je3UUQuEIAwAYP///xtCeAiSBL6EocSBx855dnVg3XrorT1N9rGB5QTmmKzWsBda20hIIM6PXbWEeRX5HwJYko4BAaYsJUt2KCILAkTBGw7gLpZqzvebTC3QZXvZlJJgpooOfclxbMrhU0RPh1QPqiVDLWLO9ZK7W97ySjnW4hPozdboW1Jv29QBSbYkmLTOk57yef3lf9+m8iEM30oIvoMdeRjXyIkp44mtyNy046ntjYyu9KVJYrTHDctuewOVY5yiBVOfNAAAAABJRU5ErkJggg=='); background-size: contain; margin-bottom: -6px; background-repeat: no-repeat }
+.playing > .pausebutton{background-image: url(/images/pauseactive.png); cursor: pointer}
+div.intro{max-width: 280px;border:1px solid #E6E6FA;float:left;width:100%;height: 200px;margin: 0px 20px 20px 0px;padding: 0px 4px 4px 10px;}
+div.intro p {text-align:left;text-indent: 0px;}
+div.intro h2 a{font-size:22px;color:#222;    font-weight: 700;}
+div.intro h2{margin:10px 0px 10px 0px}
+p{line-height: 1.5;text-indent: 0px;}
+h2{font-size:22px}
+div.share{padding-top:10px;min-height: 35px;}
+a:link, a:visited {
+color: #005CD4;
+font-weight: 400;
+text-decoration: underline;
+}
+.notainh3, .equalto {font-weight: 400;}
+.notainh3 {font-size:14px}
+.chords{border:0 solid #E6E6FA;float:left;height:130px;margin:0;text-align:center;width:120px;}
+.chords3{border:1px solid #E6E6FA;float:left;overflow:hidden;margin:10px 3px;padding:0 0 23px 2px;text-align:center;width:365px;}
+.chords3 > a {display: block;clear: both;text-align: center;}
+.chords1{border:1px solid #E6E6FA;float:left;height:210px;margin:2px 4px;text-align:center;width:360px;}
+.ukulele-note-chords .chords1{height:140px;margin:8px 4px;width:159px;}
+.chordsh3{font-size:18px;margin-bottom:4px;margin-top:10px;}
+.crdmini{height:100px;}
+.crd {height: 150px;}
+.ukulele-note-chords .crd {height: 86px;}
+.ukulele .chords{height:110px;margin-bottom: 4px;}
+.ukulele .crdmini{height:86px;}
+.ad_chords {margin-left: auto; margin-right: auto;}
+li.chords_li {
+line-height: 1.5;
+margin: 10px 0;
+padding-left: 0;
+font-size:16px;
+}
+.chords1 p {
+font-size: 11px;
+line-height: 11px;
+margin-bottom: 0;
+margin-top: 0;
+text-align: center;
+text-indent: 0px;
+}
+#smoothtop {
+background: url(/images/arrow-vio.png) center 70% no-repeat;
+background-color: transparent;
+height: 150px;
+width: 150px;
+}
+div.share>div{padding: 0px 0px 8px 0px;min-height: 33px;}
+div.nearsounds{overflow:hidden;}
+div.right160x600,.ad160x600{display:none}
+.bottom a[title="en"]::after {content: 'English';}
+.bottom a[title="de"]::after {content: 'Deutsch';}
+.bottom a[title="es"]::after {content: 'Español';}
+.bottom a[title="fr"]::after {content: 'Française';}
+.bottom a[title="it"]::after {content: 'Italiano';}
+.bottom a[title="pt"]::after {content: 'Português';}
+.bottom a[title="pl"]::after {content: 'Polski';}
+.bottom a[title="ro"]::after {content: 'Română';}
+.bottom a[title="nl"]::after {content: 'Nederlands';}
+.bottom a[title="hu"]::after {content: 'Magyar';}
+.bottom a[title="cs"]::after {content: 'Čeština';}
+.bottom a[title="ja"]::after {content: '日本語';}
+.bottom a[title="sv"]::after {content: 'Svenska';}
+.bottom a[title="nb"]::after {content: 'Norsk';}
+.bottom a[title="da"]::after {content: 'Dansk';}
+ul.languages {
+font-size: 15px;
+list-style-type: none;
+margin: 0 0px 15px 0px;
+padding: 0;
+text-align:center;
+}
+ul.languages li {
+margin: 0 0 6px 0; padding:0;    display: inline-block; margin-right: 10px;
+}
+@media all and (min-width:1199px) {
+div.right160x600{width:160px;height:600px;margin:25px 2px 0px 10px;padding:0;float: right;display:block;overflow:hidden;}
+.ad160x600{display: block;width: 160px;height: 600px;}
+div.content{overflow:hidden}
+}
+@media all and (min-width:1461px) {
+div.logo{height:463px; background: url(//tuner-online.com/images/classic2000.jpg) no-repeat 0% 0;}
+.drop-d div.logo{background: url(//tuner-online.com/images/drop_d2000.jpg) no-repeat 0% 0;}
+.double-drop-d div.logo{background: url(//tuner-online.com/images/double_drop_d2000.jpg) no-repeat 0% 0;}
+.drop-c div.logo{background: url(//tuner-online.com/images/drop_c2000.jpg) no-repeat 0% 0;}
+.open-c div.logo{background: url(//tuner-online.com/images/open_c2000.jpg) no-repeat 0% 0;}
+.cm11 div.logo{background: url(//tuner-online.com/images/cm11_2000.jpg) no-repeat 0% 0;}
+.open-g div.logo{background: url(//tuner-online.com/images/open_g2000.jpg) no-repeat 0% 0;}
+.open-d div.logo{background: url(//tuner-online.com/images/open_d2000.jpg) no-repeat 0% 0;}
+.ukulele div.logo{background: url(//tuner-online.com/images/ukulele2000.png) no-repeat 0% 0; height:370px;}
+.ukulele.baritone div.logo{background: url(//tuner-online.com/images/baritoneukulele2000.png) no-repeat 0% 0; height:370px;}
+.guitalele div.logo{background: url(//tuner-online.com/images/guitalele2000.jpg) no-repeat 0% 0;}
+.category div.logo{height:287px;}
+div.logo a{width:510px;height:80px;}
+h1{font-size: 34px;text-indent: 25px;padding-bottom: 2px;}
+p, li.chords_li{font-size:17px}
+ol.instruction{font-size:17px;}
+h2{font-size:28px}
+p.noteslist{font-size:21px;color:#000;line-height: 2;}
+.menu-heading{font-size: 21px;}
+div.left{width: 330px;}
+ul.menu li a{font-size: 17px;padding: 15px 1px 15px 6px;}
+ul.submenu li a{ font-size: 17px; padding: 10px 1px 10px 32px; }
+div.intro{height: 207px;}
+.totunerlink{position: absolute;left: 130px;top: 130px;width: 350px;height: 320px;}
+}
+@media all and (min-width:2001px) {
+div.logo, .drop-d div.logo, .double-drop-d div.logo, .drop-c div.logo, .open-c div.logo, .cm11 div.logo, .open-g div.logo, .open-d div.logo, .guitalele div.logo {background-position:center top;}
+}
+@media all and (min-width:1291px) and (max-width:1460px) {
+div.bottom p{font-size: 14px;}
+div.logo{height:352px; background: url(//tuner-online.com/images/classic.jpg) no-repeat 0% 0;}
+.drop-d div.logo{background: url(//tuner-online.com/images/drop_d.jpg) no-repeat 0% 0;}
+.double-drop-d div.logo{background: url(//tuner-online.com/images/double_drop_d.jpg) no-repeat 0% 0;}
+.drop-c div.logo{background: url(//tuner-online.com/images/drop_c.jpg) no-repeat 0% 0;}
+.open-c div.logo{background: url(//tuner-online.com/images/open_c.jpg) no-repeat 0% 0;}
+.cm11 div.logo{background: url(//tuner-online.com/images/cm11.jpg) no-repeat 0% 0;}
+.open-g div.logo{background: url(//tuner-online.com/images/open_g.jpg) no-repeat 0% 0;}
+.open-d div.logo{background: url(//tuner-online.com/images/open_d.jpg) no-repeat 0% 0;}
+.ukulele div.logo{background: url(//tuner-online.com/images/ukulele.png) no-repeat 0% 0;}
+.ukulele.baritone div.logo{background: url(//tuner-online.com/images/baritoneukulele.png) no-repeat 0% 0;}
+.guitalele div.logo{background: url(//tuner-online.com/images/guitalele.jpg) no-repeat 0% 0;}
+.category div.logo{height:213px;}
+div.logo a{width:410px;height:52px;}
+h1{font-size: 28px;text-indent: 25px;padding-bottom: 6px;}
+p, li.chords_li{font-size:15px}
+div.intro h2 a {font-size: 19px;}
+div.intro {max-width: 260px;}
+ol.instruction{font-size:16px;}
+h2{font-size:23px}
+p.noteslist{font-size:20px;color:#000;line-height: 2;}
+.menu-heading{font-size: 18px;}
+div.left{width: 235px;}
+ul.menu li a{font-size: 16px;padding: 10px 1px 10px 6px;}
+ul.submenu li a{ font-size: 17px; padding: 10px 1px 10px 32px; }
+.totunerlink{position: absolute;left: 100px;top: 95px;width: 230px;height: 232px;}
+}
+@media all and (min-width:700px) and (max-width:1290px) {
+div.bottom p{font-size: 14px;}
+div.intro h2 a {font-size: 19px;}
+div.intro {max-width: 240px;    height: 216px;}
+div.logo{height:313px; background: url(//tuner-online.com/images/classic1.jpg) no-repeat 0% 0;}
+.drop-d div.logo{background: url(//tuner-online.com/images/drop_d1.jpg) no-repeat 0% 0;}
+.double-drop-d div.logo{background: url(//tuner-online.com/images/double_drop_d1.jpg) no-repeat 0% 0;}
+.drop-c div.logo{background: url(//tuner-online.com/images/drop_c1.jpg) no-repeat 0% 0;}
+.open-c div.logo{background: url(//tuner-online.com/images/open_c1.jpg) no-repeat 0% 0;}
+.cm11 div.logo{background: url(//tuner-online.com/images/cm11_1.jpg) no-repeat 0% 0;}
+.open-g div.logo{background: url(//tuner-online.com/images/open_g1.jpg) no-repeat 0% 0;}
+.open-d div.logo{background: url(//tuner-online.com/images/open_d1.jpg) no-repeat 0% 0;}
+.ukulele div.logo{background: url(//tuner-online.com/images/ukulele1.png) no-repeat 0% 0;}
+.ukulele.baritone div.logo{background: url(//tuner-online.com/images/baritoneukulele1.png) no-repeat 0% 0;}
+.guitalele div.logo{background: url(//tuner-online.com/images/guitalele1.jpg) no-repeat 0% 0;}
+.category div.logo{height:190px;}
+div.logo a{width:360px;height:46px;}
+h1{font-size: 27px;text-indent: 25px;padding-bottom: 7px;}
+p, li.chords_li{font-size:15px;}
+ol.instruction{font-size:15px;}
+p.noteslist{font-size:15px;color:#000;line-height: 2;}
+.menu-heading{font-size:18px}
+div.left{width: 200px;}
+.totunerlink{position: absolute;left: 100px;top: 95px;width: 270px;height: 200px;}
+}
+@media all and (min-width:960px) and (max-width:1040px) {
+div.content{padding: 10px 4px 10px 10px;margin: 2px 1px 10px 0px;}
+.chords3{margin:10px 1px;}
+}
+@media all and (min-width:0px) and (max-width:699px) {
+div.logo{height:182px; background: url(//tuner-online.com/images/classic1.jpg) no-repeat 0% 0;background-size:cover;}
+.drop-d div.logo{background: url(//tuner-online.com/images/drop_d1.jpg) no-repeat 0% 0;background-size:cover;}
+.double-drop-d div.logo{background: url(//tuner-online.com/images/double_drop_d1.jpg) no-repeat 0% 0;background-size:cover;}
+.drop-c div.logo{background: url(//tuner-online.com/images/drop_c1.jpg) no-repeat 0% 0;background-size:cover;}
+.open-c div.logo{background: url(//tuner-online.com/images/open_c1.jpg) no-repeat 0% 0;background-size:cover;}
+.cm11 div.logo{background: url(//tuner-online.com/images/cm11_1.jpg) no-repeat 0% 0;background-size:cover;}
+.open-g div.logo{background: url(//tuner-online.com/images/open_g1.jpg) no-repeat 0% 0;background-size:cover;}
+.open-d div.logo{background: url(//tuner-online.com/images/open_d1.jpg) no-repeat 0% 0;background-size:cover;}
+.ukulele div.logo{background: url(//tuner-online.com/images/ukulele-mob.png) no-repeat 0% 0;background-size:cover;}
+.ukulele.baritone div.logo{background: url(//tuner-online.com/images/baritoneukulele-mob.png) no-repeat 0% 0;background-size:cover;}
+.guitalele div.logo{background: url(//tuner-online.com/images/guitalele1.jpg) no-repeat 0% 0;background-size:cover;}
+.category div.all-wide{margin-top:-73px;background-color:#fff}
+div.logo a{width:240px;height:38px;}
+div.left{float:none;width:100%;max-width: 300px; margin-top: 16px; margin-bottom: 1px;}
+.category div.left{padding-top:17px;}
+div.content{float:none;border: none;margin: 0; padding-top:20px}
+div.right{float:none;}
+h1{font-size:28px; border:none}
+p, li.chords_li{font-size: 16px;}
+p.noteslist{font-size:18px;color:#000;line-height: 2;}
+.menu-heading{font-size:20px;border-bottom: 1px dashed #000;color: #000;    cursor: pointer;display: inline-block;}
+ul.menu li a{ padding: 10px 1px 10px 10px; }
+ul.submenu li a{ padding: 9px 1px 9px 30px; }
+.menu-heading { margin-left:0; }
+ul.menu {display:none}
+#tunerback{margin-left:-1px;}
+div.intro{border:none;float:none;width:100%;height: initial;margin: 40px 0px 0px 0px;padding: 0px 0px 0px 10px;}
+ol.instruction{font-size:16px;}
+.chords3 {
+margin: 10px 0 0;
+padding: 0 0 14px;
+width: 100%;
+height: inherit;
+}
+.chords {
+margin: 0 2% 3% 0;
+width: 30%;
+height: inherit;
+text-align: center;
+}
+.crdmini {
+height: 100%;
+width: 100%;
+max-height: 100px;
+max-width: 112px;
+}
+.ukulele .crdmini{max-height:86px;}
+div.bottom {padding: 20px 5px 10px 10px;display: table;width: auto;margin: 0;}
+div.bottom p{text-indent: 0px;text-align: left;line-height: 1.75;font-size: 15px; }
+div.bottom_left{display: table-footer-group;}
+#smoothtop{display:none}
+div.bottom_right{ display: table-row-group; }
+div.bottom_middle{display:table-header-group;}
+.footer-search-box{width:100%;margin-bottom:25px;}
+.generator {
+width: 100%;height: initial;
+}
+p{line-height: 1.5;text-align: left;text-indent: 0px;}
+p.maintext{margin-top: 16px;margin-bottom: 17px;}
+div.chords1 {
+height: 235px;
+margin: 0 0 10px;
+padding: 0;
+width: 100%;
+}
+.crd {
+height: 150px;
+}
+.chords1 p {font-size: 12px;}
+.ukulele-note-chords .chords1 p {font-size: 11px;}
+.content iframe[src*='youtube']{height: 300px;}
+.totunerlink{display:none;}
+#tunerframe{min-height: 360px}
+div.all-wide {margin-bottom: 15px;}
+ul.languages {text-align:left;}
+ul.languages li { margin: 7px 0px 12px 0px; display: list-item; margin-right: 0px;}
+div.undermenu {display:none}
+}
+@media all and (min-width:1100px) { div.content{padding-left:15px;} }
+@media all and (min-width:0px) and (max-width:417px) {
+div.logo{background: url(//tuner-online.com/images/classic_mob.jpg) no-repeat 0% 0;background-size: cover;}
+.drop-d div.logo{background: url(//tuner-online.com/images/drop_d_mob.jpg) no-repeat 0% 0;background-size: cover;}
+.double-drop-d div.logo{background: url(//tuner-online.com/images/double_drop_d_mob.jpg) no-repeat 0% 0;background-size: cover;}
+.drop-c div.logo{background: url(//tuner-online.com/images/drop_c_mob.jpg) no-repeat 0% 0;background-size: cover;}
+.open-c div.logo{background: url(//tuner-online.com/images/open_c_mob.jpg) no-repeat 0% 0;background-size: cover;}
+.cm11 div.logo{background: url(//tuner-online.com/images/cm11_mob.jpg) no-repeat 0% 0;background-size: cover;}
+.open-g div.logo{background: url(//tuner-online.com/images/open_g_mob.jpg) no-repeat 0% 0;background-size: cover;}
+.open-d div.logo{background: url(//tuner-online.com/images/open_d_mob.jpg) no-repeat 0% 0;background-size: cover;}
+.guitalele div.logo{background: url(//tuner-online.com/images/guitalele_mob.jpg) no-repeat 0% 0;background-size: cover;}
+}
+@media all and (min-width:0px) and (max-width:361px) {
+div.logo{background: url(//tuner-online.com/images/classic_m.jpg) no-repeat 0% 0;background-size: cover;}
+}
