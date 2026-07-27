@@ -2,17 +2,16 @@
 
 **PocketEdit** is a powerful, mobile-friendly, browser-based web application designed for deep, real-time control over your **Sonicake Pocket Master** multi-effects pedal. It provides a sleek, modern graphical interface to manage presets, edit effects in real-time, customize your theme, and visualize your signal chain—all without installing any software or apps.
 
-Written purely in HTML, CSS, and JavaScript, **PocketEdit** runs directly in your web browser on PC, Mac, Android, and iOS devices. 
+Written purely in HTML, CSS, and JavaScript, **PocketEdit** runs directly in your web browser on PC, Mac, Android, and iOS devices.
 
-![screenshot](img/gui.png)
+![screenshot](img/gui.jpg)
 
 ---
 
 ## **🌐 Online Access**
 
 You can access PocketEdit online anytime:  
-
-[Online App](https://icandia-nvy.github.io/PocketEdit-Mobile/) 
+👉 **[https://suckyble.github.io/PocketEdit/](https://suckyble.github.io/PocketEdit/)**
 
 Alternatively, you can clone or download this repository and double-click `index.html` to run it locally offline.
 
@@ -31,6 +30,7 @@ Alternatively, you can clone or download this repository and double-click `index
 * **Drag-and-Drop Order:** Easily reorder movable modules (`NR`, `FX1`, `FX2`, `DLY`, `RVB`) by dragging them to new positions.
 * **Tap Tempo Engine:** Interactive Tap Tempo button with sub-division calculations (1/4, 1/8, 1/8 Dotted, 1/2) for delay synchronization.
 * **Unsaved Changes Indicator:** Prompts you with a warning if you attempt to leave or switch presets with unsaved tweaks.
+* **Integrated Online Guitar Tuner:** Built-in real-time chromatic tuner modal accessible directly below the Patch Volume slider (`🎸 Online tuner`). Uses HTML5 Web Audio API and Canvas Gauges for microphone-based pitch analysis without leaving the app.
 
 ### 🎨 **Custom RGB Accent Theme Manager**
 * **RGB Color Picker:** Customize the entire editor's visual style with any accent color of your choice via the Advanced Settings (`⚙️`) panel.
@@ -81,7 +81,7 @@ Quickly navigate presets, tweak modules, and control the editor using your keybo
 
 ## **🚀 Getting Started**
 
-1. **Open the App:** Visit the [Online App](https://icandia-nvy.github.io/PocketEdit-Mobile/) or launch `index.html` locally.
+1. **Open the App:** Visit the [Online App](https://suckyble.github.io/PocketEdit/) or launch `index.html` locally.
 2. **Connect Device:** Click **🔌 Conectar USB (MIDI)** or **📡 Conectar Bluetooth** in the top sidebar.
 3. **Pair Device:** If using Bluetooth, select **Sonic Master BLE** from the browser dialog and click **Pair**.
 4. **Syncing:** Wait a moment while PocketEdit syncs all presets, IRs, and settings from your device.
@@ -93,6 +93,7 @@ Quickly navigate presets, tweak modules, and control the editor using your keybo
 
 * **USB WebMIDI & Dual Communication:** Big thanks to [@hnikolov](https://github.com/hnikolov) for implementing USB MIDI integration, windowing logic, and two-way hardware sync.
 * **CRC-8 Logic:** Optimized preset writing via precise CRC-8 calculation by [@hnikolov](https://github.com/hnikolov).
+* **Online Guitar Tuner:** Integrated chromatic tuner based on [Tuner-Online.com](https://tuner-online.com/) (Web Audio API autocorrelation pitch detection & Canvas Gauge engine).
 * Created with reverse-engineering logic, BLE/HCI packet analysis, and AI-assisted development.
 
 ---
