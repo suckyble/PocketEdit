@@ -11,7 +11,7 @@ Written purely in HTML, CSS, and JavaScript, **PocketEdit** runs directly in you
 ## **🌐 Online Access**
 
 You can access PocketEdit online anytime:  
-👉 **[https://suckyble.github.io/PocketEdit/](https://suckyble.github.io/PocketEdit/)**
+👉 **[https://icandia-nvy.github.io/PocketEdit-Mobile/](https://icandia-nvy.github.io/PocketEdit-Mobile/)**
 
 Alternatively, you can clone or download this repository and double-click `index.html` to run it locally offline.
 
@@ -81,7 +81,7 @@ Quickly navigate presets, tweak modules, and control the editor using your keybo
 
 ## **🚀 Getting Started**
 
-1. **Open the App:** Visit the [Online App](https://suckyble.github.io/PocketEdit/) or launch `index.html` locally.
+1. **Open the App:** Visit the [Online App](https://icandia-nvy.github.io/PocketEdit-Mobile/) or launch `index.html` locally.
 2. **Connect Device:** Click **🔌 Conectar USB (MIDI)** or **📡 Conectar Bluetooth** in the top sidebar.
 3. **Pair Device:** If using Bluetooth, select **Sonic Master BLE** from the browser dialog and click **Pair**.
 4. **Syncing:** Wait a moment while PocketEdit syncs all presets, IRs, and settings from your device.
